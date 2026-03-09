@@ -213,7 +213,17 @@ export default function AgentCreate() {
   }
 
   const submit = () => {
-    const values = form.getFieldsValue()
+    // 使用 formData 状态（包含了所有步骤通过 onValuesChange 累积的数据）
+    // 而不是 form.getFieldsValue()（只返回当前渲染的字段）
+    const values = {
+      name: formData.name,
+      displayName: formData.displayName,
+      emoji: formData.emoji || '🐕',
+      role: formData.role,
+      feishu: formData.feishu,
+      openClawChat: formData.openClawChat,
+      skills: formData.skills
+    }
     createMutation.mutate(values)
   }
 
