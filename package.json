@@ -1,0 +1,26 @@
+{
+  "name": "agent-config-ui",
+  "version": "1.0.0",
+  "description": "Agent 配置管理系统 - 人性化配置 OpenClaw Agent",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build && cd ../backend && npm run build",
+    "start": "cd backend && npm start",
+    "test": "cd backend && npm test && cd ../frontend && npm test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "keywords": [
+    "openclaw",
+    "agent",
+    "config",
+    "management"
+  ],
+  "author": "",
+  "license": "MIT"
+}
