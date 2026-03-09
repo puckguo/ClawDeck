@@ -190,6 +190,12 @@ export interface CreateAgentRequest {
   displayName: string;
   emoji: string;
   role?: string;
+  ai?: {
+    provider: string;
+    model: string;
+    apiKey?: string;
+    baseUrl?: string;
+  };
   feishu?: {
     enabled: boolean;
     appId: string;

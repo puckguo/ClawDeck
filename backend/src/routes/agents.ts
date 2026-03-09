@@ -10,6 +10,26 @@ const router = Router();
 const agentService = AgentService.getInstance();
 
 /**
+ * GET /api/agents/defaults/ai
+ * 获取默认 AI 配置
+ */
+router.get('/defaults/ai', async (req, res, next) => {
+  try {
+    const defaultAI = await agentService.getDefaultAIConfig();
+    res.json({
+      success: true,
+      data: defaultAI || {
+        provider: 'deepseek',
+        model: 'deepseek-chat',
+        baseUrl: 'https://api.deepseek.com/v1'
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/agents
  * 获取所有 Agent 列表
  */
@@ -32,7 +52,7 @@ router.get('/', async (req, res, next) => {
  */
 router.post('/', async (req, res, next) => {
   try {
-    const { name, displayName, emoji, role, feishu, openClawChat, skills } = req.body;
+    const { name, displayName, emoji, role, feishu, openClawChat, skills, autoStart, ai } = req.body;
 
     if (!name) {
       throw createError('Agent name is required', 400, 'VALIDATION_ERROR');
@@ -45,8 +65,33 @@ router.post('/', async (req, res, next) => {
       role,
       feishu,
       openClawChat,
-      skills
+      skills,
+      ai
     });
+
+    // 如果请求了自动启动，则启动Agent
+    if (autoStart) {
+      try {
+        await agentService.startAgent(agent.id);
+        // 重新获取Agent状态
+        const updatedAgent = await agentService.getAgent(agent.id);
+        res.status(201).json({
+          success: true,
+          data: updatedAgent || agent,
+          message: `Agent ${agent.name} created and started successfully`
+        });
+        return;
+      } catch (startError: any) {
+        // 启动失败，但创建成功，返回警告信息
+        res.status(201).json({
+          success: true,
+          data: agent,
+          warning: `Agent created but failed to start: ${startError.message}`,
+          message: `Agent ${agent.name} created successfully but failed to start`
+        });
+        return;
+      }
+    }
 
     res.status(201).json({
       success: true,

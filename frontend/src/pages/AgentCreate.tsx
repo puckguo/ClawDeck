@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from 'react-query'
+import { useMutation, useQuery } from 'react-query'
 import {
   Card, Steps, Form, Input, Button, message,
   Space, Typography, Radio, Alert, Descriptions, Tag, Checkbox
@@ -16,11 +16,51 @@ const { Step } = Steps
 
 const emojis = ['🐕', '🐱', '🦊', '🐼', '🦁', '🐰', '🐯', '🐨', '🐷', '🐸']
 
+const aiProviders = [
+  { value: 'deepseek', label: 'DeepSeek', defaultModel: 'deepseek-chat', baseUrl: 'https://api.deepseek.com/v1' },
+  { value: 'openai', label: 'OpenAI', defaultModel: 'gpt-4', baseUrl: 'https://api.openai.com/v1' },
+  { value: 'anthropic', label: 'Anthropic', defaultModel: 'claude-3-opus-20240229', baseUrl: 'https://api.anthropic.com' },
+  { value: 'kimi-coding', label: 'Kimi (Coding)', defaultModel: 'k2p5', baseUrl: 'https://api.kimi.com/coding/' },
+  { value: 'google', label: 'Google (Gemini)', defaultModel: 'gemini-pro', baseUrl: 'https://generativelanguage.googleapis.com' },
+  { value: 'moonshot', label: 'Moonshot', defaultModel: 'moonshot-v1-8k', baseUrl: 'https://api.moonshot.cn/v1' },
+]
+
 export default function AgentCreate() {
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(0)
   const [form] = Form.useForm()
   const [formData, setFormData] = useState<any>({})
+
+  // 获取默认 AI 配置
+  const defaultAIQuery = useQuery('defaultAI', () => agentsApi.getDefaultAI(), {
+    onSuccess: (data) => {
+      const ai = data.data
+      if (ai) {
+        setFormData((prev: any) => ({
+          ...prev,
+          ai: {
+            provider: ai.provider,
+            model: ai.model,
+            apiKey: ai.apiKey || '',
+            baseUrl: ai.baseUrl || ''
+          }
+        }))
+        // 设置表单字段值
+        form.setFieldsValue({
+          ai: {
+            provider: ai.provider,
+            model: ai.model,
+            apiKey: ai.apiKey || '',
+            baseUrl: ai.baseUrl || ''
+          }
+        })
+      }
+    },
+    onError: () => {
+      // 使用默认配置
+      message.warning('无法读取默认 AI 配置，使用内置默认值')
+    }
+  })
 
   const createMutation = useMutation(
     (values: any) => agentsApi.create(values),
@@ -77,6 +117,58 @@ export default function AgentCreate() {
               placeholder="描述这个助手的职责和特点..."
             />
           </Form.Item>
+
+          <Card title="🤖 AI 模型配置" style={{ marginTop: '16px' }} loading={defaultAIQuery.isLoading}>
+            <Alert
+              message="已自动读取 openclaw 项目配置"
+              description={defaultAIQuery.data?.data ? (
+                <span>使用 <Tag color="blue">{defaultAIQuery.data.data.provider}</Tag> {defaultAIQuery.data.data.model}</span>
+              ) : '使用默认配置'}
+              type="info"
+              showIcon
+              style={{ marginBottom: '16px' }}
+            />
+
+            <Form.Item
+              name={['ai', 'provider']}
+              label="AI Provider"
+            >
+              <Radio.Group optionType="button" buttonStyle="solid">
+                {aiProviders.map(p => (
+                  <Radio.Button key={p.value} value={p.value}>{p.label}</Radio.Button>
+                ))}
+              </Radio.Group>
+            </Form.Item>
+
+            <Form.Item
+              name={['ai', 'model']}
+              label="模型"
+            >
+              <Input placeholder="例如：deepseek-chat, gpt-4, claude-3-opus" />
+            </Form.Item>
+
+            <Form.Item
+              name={['ai', 'apiKey']}
+              label="API Key"
+              rules={[{ required: true, message: '请输入 API Key' }]}
+            >
+              <Input.Password placeholder="sk-xxxxxxxxxxxxxxxx" />
+            </Form.Item>
+
+            <Form.Item
+              name={['ai', 'baseUrl']}
+              label="Base URL (可选)"
+            >
+              <Input placeholder="https://api.deepseek.com/v1" />
+            </Form.Item>
+
+            <Alert
+              message="API Key 安全提示"
+              description="API Key 将保存在 Agent 目录的 .env 文件中，请妥善保管"
+              type="info"
+              showIcon
+            />
+          </Card>
         </Form>
       )
     },
@@ -176,6 +268,10 @@ export default function AgentCreate() {
             <Descriptions.Item label="助手名称">{formData.name}</Descriptions.Item>
             <Descriptions.Item label="显示名称">{formData.displayName}</Descriptions.Item>
             <Descriptions.Item label="形象">{formData.emoji}</Descriptions.Item>
+            <Descriptions.Item label="AI Provider">
+              {formData.ai?.provider ? <Tag color="blue">{formData.ai.provider}</Tag> : <Tag color="blue">deepseek</Tag>}
+            </Descriptions.Item>
+            <Descriptions.Item label="模型">{formData.ai?.model || 'deepseek-chat'}</Descriptions.Item>
             <Descriptions.Item label="飞书连接">
               {formData.feishu?.enabled ? <Tag color="green">已启用</Tag> : <Tag>未启用</Tag>}
             </Descriptions.Item>
@@ -220,9 +316,16 @@ export default function AgentCreate() {
       displayName: formData.displayName,
       emoji: formData.emoji || '🐕',
       role: formData.role,
+      ai: formData.ai || defaultAIQuery.data?.data || {
+        provider: 'deepseek',
+        model: 'deepseek-chat',
+        apiKey: '',
+        baseUrl: 'https://api.deepseek.com/v1'
+      },
       feishu: formData.feishu,
       openClawChat: formData.openClawChat,
-      skills: formData.skills
+      skills: formData.skills,
+      autoStart: true  // 创建后自动启动
     }
     createMutation.mutate(values)
   }
@@ -270,5 +373,3 @@ export default function AgentCreate() {
     </div>
   )
 }
-
-

@@ -9,6 +9,11 @@ import type {
 } from '../../../shared/types'
 
 export const agentsApi = {
+  // 获取默认 AI 配置
+  getDefaultAI(): Promise<ApiResponse<{ provider: string; model: string; baseUrl?: string; apiKey?: string }>> {
+    return apiClient.get('/agents/defaults/ai')
+  },
+
   // 获取所有 Agent
   getAll(): Promise<ApiResponse<AgentViewModel[]>> {
     return apiClient.get('/agents')

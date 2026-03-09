@@ -30,6 +30,37 @@ const WORKSPACES_DIR = path.join(OPENCLAW_ROOT, 'workspaces');
 const VERSIONS_DIR = path.join(OPENCLAW_ROOT, '.config-versions');
 const LOGS_DIR = process.env.LOGS_DIR || (isWindows ? path.join(os.tmpdir(), 'agent-config-ui') : '/tmp/agent-config-ui');
 
+// AI Provider API Key 环境变量映射（与 OpenClaw 保持一致）
+const PROVIDER_API_KEY_ENV_VARS: Record<string, string[]> = {
+  openai: ['OPENAI_API_KEY'],
+  anthropic: ['ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN'],
+  google: ['GEMINI_API_KEY'],
+  minimax: ['MINIMAX_API_KEY'],
+  moonshot: ['MOONSHOT_API_KEY'],
+  'kimi-coding': ['KIMI_API_KEY', 'KIMICODE_API_KEY', 'ANTHROPIC_AUTH_TOKEN'],
+  deepseek: ['DEEPSEEK_API_KEY'],
+  synthetic: ['SYNTHETIC_API_KEY'],
+  openrouter: ['OPENROUTER_API_KEY'],
+  together: ['TOGETHER_API_KEY'],
+  huggingface: ['HUGGINGFACE_HUB_TOKEN', 'HF_TOKEN'],
+  xai: ['XAI_API_KEY'],
+  mistral: ['MISTRAL_API_KEY'],
+  kilocode: ['KILOCODE_API_KEY'],
+  volcengine: ['VOLCANO_ENGINE_API_KEY'],
+};
+
+// 需要从父进程传递的其他环境变量
+const ADDITIONAL_ENV_VARS = [
+  'ANTHROPIC_BASE_URL',
+  'ANTHROPIC_DEFAULT_HAIKU_MODEL',
+  'ANTHROPIC_DEFAULT_OPUS_MODEL',
+  'ANTHROPIC_DEFAULT_SONNET_MODEL',
+  'OPENAI_BASE_URL',
+  'KIMI_BASE_URL',
+  'DEEPSEEK_BASE_URL',
+  'DEEPSEEK_API_KEY',
+];
+
 export class AgentService {
   private static instance: AgentService;
   private agentCache: Map<string, AgentViewModel> = new Map();
@@ -340,6 +371,12 @@ export class AgentService {
     // 生成端口
     const port = await this.findAvailablePort();
 
+    // 确定 AI Provider 配置
+    const aiProvider = request.ai?.provider || 'deepseek';
+    const aiModel = request.ai?.model || 'deepseek-chat';
+    const aiApiKey = request.ai?.apiKey;
+    const aiBaseUrl = request.ai?.baseUrl;
+
     // 生成配置
     const config: OpenClawConfig = {
       meta: {
@@ -348,33 +385,19 @@ export class AgentService {
       },
       auth: {
         profiles: {
-          'kimi-coding:default': {
-            provider: 'kimi-coding',
+          [`${aiProvider}:default`]: {
+            provider: aiProvider,
             mode: 'api_key'
           }
         }
       },
       models: {
         mode: 'merge',
-        providers: {
-          'kimi-coding': {
-            baseUrl: 'https://api.kimi.com/coding/',
-            api: 'anthropic-messages',
-            models: [{
-              id: 'k2p5',
-              name: 'Kimi for Coding',
-              reasoning: false,
-              input: ['text', 'image'],
-              cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-              contextWindow: 262144,
-              maxTokens: 32768
-            }]
-          }
-        }
+        providers: this.buildModelProvider(aiProvider, aiModel, aiBaseUrl)
       },
       agents: {
         defaults: {
-          model: { primary: 'kimi-coding/k2p5' },
+          model: { primary: `${aiProvider}/${aiModel}` },
           workspace: workspaceDir,
           contextPruning: { mode: 'cache-ttl', ttl: '24h' },
           compaction: { mode: 'safeguard' }
@@ -383,7 +406,7 @@ export class AgentService {
           id: agentId,
           name: request.name,
           workspace: workspaceDir,
-          agentDir: path.join(agentDir, 'agent')
+          agentDir: path.join(agentDir, 'agents', 'main')
         }]
       },
       session: {
@@ -436,8 +459,27 @@ export class AgentService {
     await fs.writeJson(path.join(agentDir, 'openclaw.json'), config, { spaces: 2 });
 
     // 创建 .env 文件
-    const envContent = this.generateEnvFile(config, agentId);
+    const envContent = this.generateEnvFile(config, agentId, request);
     await fs.writeFile(path.join(agentDir, '.env'), envContent);
+
+    // 创建 agent 目录结构 (agents/main/agent/) 和 auth-profiles.json
+    const agentMainDir = path.join(agentDir, 'agents', 'main');
+    const agentSubDir = path.join(agentMainDir, 'agent');
+    await fs.ensureDir(agentSubDir);
+
+    if (aiApiKey) {
+      const authProfiles: Record<string, any> = {
+        version: 1,
+        profiles: {
+          [`${aiProvider}:default`]: {
+            type: 'api_key',
+            provider: aiProvider,
+            key: aiApiKey
+          }
+        }
+      };
+      await fs.writeJson(path.join(agentSubDir, 'auth-profiles.json'), authProfiles, { spaces: 2 });
+    }
 
     // 重新扫描
     await this.scanAgents();
@@ -468,10 +510,82 @@ export class AgentService {
   }
 
   /**
+   * 收集 API Key 环境变量
+   */
+  private collectApiKeyEnvVars(request?: CreateAgentRequest): string {
+    const envVars: string[] = [];
+    const provider = request?.ai?.provider || 'deepseek';
+    const apiKey = request?.ai?.apiKey;
+
+    // 如果用户提供了 API key，优先使用
+    if (apiKey) {
+      const envVarName = this.getApiKeyEnvVarName(provider);
+      envVars.push(`${envVarName}=${apiKey}`);
+    } else {
+      // 从系统环境变量收集 API key
+      for (const [p, varNames] of Object.entries(PROVIDER_API_KEY_ENV_VARS)) {
+        for (const varName of varNames) {
+          const value = process.env[varName];
+          if (value) {
+            envVars.push(`${varName}=${value}`);
+            break;
+          }
+        }
+      }
+    }
+
+    // 添加 baseUrl（如果用户提供了）
+    if (request?.ai?.baseUrl) {
+      const baseUrlVarName = this.getBaseUrlEnvVarName(provider);
+      envVars.push(`${baseUrlVarName}=${request.ai.baseUrl}`);
+    }
+
+    // 收集其他需要传递的环境变量
+    for (const varName of ADDITIONAL_ENV_VARS) {
+      const value = process.env[varName];
+      if (value) {
+        envVars.push(`${varName}=${value}`);
+      }
+    }
+
+    return envVars.join('\n');
+  }
+
+  /**
+   * 获取 API key 环境变量名
+   */
+  private getApiKeyEnvVarName(provider: string): string {
+    const envVars: Record<string, string> = {
+      deepseek: 'DEEPSEEK_API_KEY',
+      openai: 'OPENAI_API_KEY',
+      anthropic: 'ANTHROPIC_API_KEY',
+      'kimi-coding': 'ANTHROPIC_AUTH_TOKEN',
+      google: 'GEMINI_API_KEY',
+      moonshot: 'MOONSHOT_API_KEY',
+    };
+    return envVars[provider] || `${provider.toUpperCase()}_API_KEY`;
+  }
+
+  /**
+   * 获取 Base URL 环境变量名
+   */
+  private getBaseUrlEnvVarName(provider: string): string {
+    const envVars: Record<string, string> = {
+      deepseek: 'DEEPSEEK_BASE_URL',
+      openai: 'OPENAI_BASE_URL',
+      anthropic: 'ANTHROPIC_BASE_URL',
+      'kimi-coding': 'ANTHROPIC_BASE_URL',
+    };
+    return envVars[provider] || `${provider.toUpperCase()}_BASE_URL`;
+  }
+
+  /**
    * 生成 .env 文件
    */
-  private generateEnvFile(config: OpenClawConfig, agentId: string): string {
+  private generateEnvFile(config: OpenClawConfig, agentId: string, request?: CreateAgentRequest): string {
     const feishu = config.channels.feishu;
+    const apiKeyEnvVars = this.collectApiKeyEnvVars(request);
+
     return `# Agent Environment Configuration
 AGENT_ID=${agentId}
 AGENT_NAME=${config.agents.list[0].name}
@@ -481,6 +595,9 @@ AGENT_DIR=${config.agents.list[0].agentDir}
 # Gateway
 GATEWAY_PORT=${config.gateway.port}
 GATEWAY_TOKEN=${config.gateway.auth.token}
+
+# AI API Keys (auto-imported from parent environment)
+${apiKeyEnvVars || '# No API keys found in parent environment'}
 
 # Feishu
 FEISHU_ENABLED=${feishu.enabled}
@@ -558,25 +675,93 @@ OPEN_CLAWCHAT_SERVER_URL=${config.channels['open-clawchat'].serverUrl}
       // 使用 openclaw gateway 启动，指定配置文件和环境变量
       const logFile = path.join(LOGS_DIR, `${agentId}.log`);
 
-      // 构建环境变量
+      // 确保日志目录存在
+      await fs.ensureDir(LOGS_DIR);
+
+      // 构建环境变量（只包含必要的环境变量）
       const envVars = {
         OPENCLAW_CONFIG_PATH: configPath,
         OPENCLAW_STATE_DIR: agentDir,
-        ...process.env
+        PATH: process.env.PATH
       };
 
       if (isWindows) {
-        // Windows: 使用 PowerShell 后台启动
-        const envStr = Object.entries(envVars)
-          .map(([k, v]) => `$env:${k} = "${v}"`)
-          .join('; ');
-        const cmd = `powershell -Command "${envStr}; Start-Process -FilePath 'openclaw' -ArgumentList 'gateway','--port','${port}' -WindowStyle Hidden -RedirectStandardOutput '${logFile}' -RedirectStandardError '${logFile}'"`;
-        await execAsync(cmd);
+        // Windows: 创建临时批处理文件来启动，避免复杂的转义问题
+        const batchFile = path.join(LOGS_DIR, `${agentId}-start.bat`);
+        const envFile = path.join(agentDir, '.env');
+
+        // 从 agent 的 .env 文件读取环境变量
+        const apiKeyLines: string[] = [];
+        if (await fs.pathExists(envFile)) {
+          const envContent = await fs.readFile(envFile, 'utf-8');
+          const envLines = envContent.split('\n');
+          for (const line of envLines) {
+            const trimmed = line.trim();
+            if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+              apiKeyLines.push(`set ${trimmed}`);
+            }
+          }
+        }
+
+        // 如果 .env 文件中没有 API key，从系统环境变量补充
+        if (apiKeyLines.length === 0) {
+          for (const [provider, varNames] of Object.entries(PROVIDER_API_KEY_ENV_VARS)) {
+            for (const varName of varNames) {
+              const value = process.env[varName];
+              if (value) {
+                apiKeyLines.push(`set ${varName}=${value}`);
+                break;
+              }
+            }
+          }
+          for (const varName of ADDITIONAL_ENV_VARS) {
+            const value = process.env[varName];
+            if (value) {
+              apiKeyLines.push(`set ${varName}=${value}`);
+            }
+          }
+        }
+
+        const batchContent = `@echo off
+set OPENCLAW_CONFIG_PATH=${configPath}
+set OPENCLAW_STATE_DIR=${agentDir}
+${apiKeyLines.join('\n')}
+start /B openclaw gateway --port ${port} > "${logFile}" 2>&1
+`;
+        await fs.writeFile(batchFile, batchContent);
+
+        // 执行批处理文件
+        await execAsync(`cmd /c "${batchFile}"`);
+
+        // 清理批处理文件
+        setTimeout(() => fs.remove(batchFile).catch(() => {}), 5000);
       } else {
         // macOS/Linux: 使用 nohup 后台启动
-        const envStr = Object.entries(envVars)
+        const envLines: string[] = [];
+
+        // 收集 API key 环境变量
+        for (const [provider, varNames] of Object.entries(PROVIDER_API_KEY_ENV_VARS)) {
+          for (const varName of varNames) {
+            const value = process.env[varName];
+            if (value) {
+              envLines.push(`export ${varName}="${value}"`);
+              break;
+            }
+          }
+        }
+        // 添加其他环境变量
+        for (const varName of ADDITIONAL_ENV_VARS) {
+          const value = process.env[varName];
+          if (value) {
+            envLines.push(`export ${varName}="${value}"`);
+          }
+        }
+
+        const baseEnvStr = Object.entries(envVars)
           .map(([k, v]) => `export ${k}="${v}"`)
           .join(' && ');
+        const apiKeyEnvStr = envLines.join(' && ');
+        const envStr = apiKeyEnvStr ? `${baseEnvStr} && ${apiKeyEnvStr}` : baseEnvStr;
         const cmd = `${envStr} && nohup openclaw gateway --port ${port} > "${logFile}" 2>&1 &`;
         await execAsync(cmd);
       }
@@ -726,6 +911,122 @@ OPEN_CLAWCHAT_SERVER_URL=${config.channels['open-clawchat'].serverUrl}
     }
 
     return versions;
+  }
+
+  /**
+   * 获取默认 AI 配置（从 openclaw 项目配置文件中读取）
+   */
+  async getDefaultAIConfig(): Promise<{ provider: string; model: string; baseUrl?: string; apiKey?: string } | null> {
+    try {
+      const configPath = path.join(OPENCLAW_ROOT, 'config.json');
+      if (!await fs.pathExists(configPath)) {
+        return null;
+      }
+
+      const config = await fs.readJson(configPath);
+      const ai = config?.multiChat?.ai;
+
+      if (!ai || !ai.enabled) {
+        return null;
+      }
+
+      return {
+        provider: ai.provider || 'deepseek',
+        model: ai.model || 'deepseek-chat',
+        baseUrl: ai.baseUrl,
+        apiKey: ai.apiKey
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * 构建模型提供商配置
+   */
+  private buildModelProvider(provider: string, model: string, baseUrl?: string): Record<string, any> {
+    const providers: Record<string, any> = {
+      deepseek: {
+        baseUrl: baseUrl || 'https://api.deepseek.com/v1',
+        api: 'openai-completions',
+        models: [{
+          id: model,
+          name: 'DeepSeek Chat',
+          reasoning: false,
+          input: ['text'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 65536,
+          maxTokens: 8192
+        }]
+      },
+      'kimi-coding': {
+        baseUrl: baseUrl || 'https://api.kimi.com/coding/',
+        api: 'anthropic-messages',
+        models: [{
+          id: model,
+          name: 'Kimi for Coding',
+          reasoning: false,
+          input: ['text', 'image'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 262144,
+          maxTokens: 32768
+        }]
+      },
+      openai: {
+        baseUrl: baseUrl || 'https://api.openai.com/v1',
+        api: 'openai-completions',
+        models: [{
+          id: model,
+          name: 'OpenAI Model',
+          reasoning: false,
+          input: ['text'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 128000,
+          maxTokens: 4096
+        }]
+      },
+      anthropic: {
+        baseUrl: baseUrl || 'https://api.anthropic.com',
+        api: 'anthropic-messages',
+        models: [{
+          id: model,
+          name: 'Anthropic Model',
+          reasoning: false,
+          input: ['text'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 200000,
+          maxTokens: 8192
+        }]
+      },
+      google: {
+        baseUrl: baseUrl || 'https://generativelanguage.googleapis.com',
+        api: 'google-generative-ai',
+        models: [{
+          id: model,
+          name: 'Google Gemini',
+          reasoning: false,
+          input: ['text', 'image'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 1048576,
+          maxTokens: 8192
+        }]
+      },
+      moonshot: {
+        baseUrl: baseUrl || 'https://api.moonshot.cn/v1',
+        api: 'openai-completions',
+        models: [{
+          id: model,
+          name: 'Moonshot',
+          reasoning: false,
+          input: ['text'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 128000,
+          maxTokens: 4096
+        }]
+      }
+    };
+
+    return { [provider]: providers[provider] || providers.deepseek };
   }
 
   /**
