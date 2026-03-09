@@ -33,6 +33,9 @@ const statusConfig = {
 }
 
 const categoryColors: Record<string, string> = {
+  '核心文件': 'blue',
+  '其他文件': 'default',
+  // 保留旧分类兼容
   '技能': 'blue',
   '性格': 'purple',
   '身份': 'cyan',

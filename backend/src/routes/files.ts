@@ -111,6 +111,22 @@ router.get('/:agentId', async (req, res, next) => {
       return acc;
     }, {} as Record<string, MdFileInfo[]>);
 
+    // 对每个分组内的文件按优先级排序
+    Object.keys(grouped).forEach(category => {
+      grouped[category].sort((a, b) => {
+        // 核心文件按 PRIORITY_FILES 顺序排序
+        if (category === '核心文件') {
+          const aIndex = PRIORITY_FILES.indexOf(a.name);
+          const bIndex = PRIORITY_FILES.indexOf(b.name);
+          if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+          if (aIndex !== -1) return -1;
+          if (bIndex !== -1) return 1;
+        }
+        // 其他按名称排序
+        return a.name.localeCompare(b.name);
+      });
+    });
+
     res.json({
       success: true,
       data: {
@@ -470,6 +486,29 @@ router.post('/:agentId/restore', async (req, res, next) => {
 });
 
 /**
+ * 核心 MD 文件列表（优先级排序）
+ */
+const PRIORITY_FILES = [
+  'SOUL.md',
+  'IDENTITY.md',
+  'AGENTS.md',
+  'TOOLS.md',
+  'USER.md',
+  'BOOTSTRAP.md',
+  'HEARTBEAT.md',
+  'CRON.md',
+  'MEMORY.md',
+  'memory.md'
+];
+
+/**
+ * 检查文件是否为核心配置文件
+ */
+export function isPriorityFile(fileName: string): boolean {
+  return PRIORITY_FILES.includes(fileName);
+}
+
+/**
  * 获取文件类别
  */
 function getFileCategory(fileName: string, relativePath: string, source: string): string {
@@ -478,23 +517,23 @@ function getFileCategory(fileName: string, relativePath: string, source: string)
 
   // 核心配置文件（在 workspaces 中）
   if (source === 'workspace') {
-    if (lowerName === 'soul.md') return '性格设定';
-    if (lowerName === 'identity.md') return '身份信息';
-    if (lowerName === 'agents.md') return '代理配置';
-    if (lowerName === 'tools.md') return '工具配置';
-    if (lowerName === 'user.md') return '用户定义';
-    if (lowerName === 'bootstrap.md') return '启动配置';
-    if (lowerName === 'heartbeat.md') return '心跳配置';
-    if (lowerName === 'cron.md') return '定时任务';
-    if (lowerName === 'memory.md') return '工作记忆';
+    if (lowerName === 'soul.md') return '核心文件';
+    if (lowerName === 'identity.md') return '核心文件';
+    if (lowerName === 'agents.md') return '核心文件';
+    if (lowerName === 'tools.md') return '核心文件';
+    if (lowerName === 'user.md') return '核心文件';
+    if (lowerName === 'bootstrap.md') return '核心文件';
+    if (lowerName === 'heartbeat.md') return '核心文件';
+    if (lowerName === 'cron.md') return '核心文件';
+    if (lowerName === 'memory.md') return '核心文件';
   }
 
   // agents 目录下的文件
-  if (lowerName === 'memory.md') return '长期记忆';
-  if (lowerPath.includes('skill')) return '技能说明';
-  if (lowerPath.includes('tools')) return '工具定义';
+  if (lowerName === 'memory.md') return '核心文件';
+  if (lowerPath.includes('skill')) return '其他文件';
+  if (lowerPath.includes('tools')) return '其他文件';
 
-  return '其他';
+  return '其他文件';
 }
 
 export { router as fileRoutes };

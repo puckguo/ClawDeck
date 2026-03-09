@@ -58,7 +58,7 @@ export default function Settings() {
 
       <Card title="关于" style={{ marginBottom: '24px' }}>
         <Paragraph>
-          <strong>Agent 配置管理台</strong>
+          <strong>ClawDeck</strong> - OpenClaw Agent 配置管理
         </Paragraph>
         <Paragraph>
           版本: 1.0.0

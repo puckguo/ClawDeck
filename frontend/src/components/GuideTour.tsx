@@ -54,7 +54,7 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
 
   const getGuideSteps = (): GuideStep[] => [
     {
-      title: '欢迎使用 Agent 配置管理',
+      title: '欢迎使用 ClawDeck',
       icon: <RocketOutlined />,
       content: (
         <div>
@@ -253,7 +253,7 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
         <div>
           <Title level={4}>🎉 恭喜！</Title>
           <Paragraph>
-            您已经了解了 Agent 配置管理系统的核心功能。
+            您已经了解了 ClawDeck 的核心功能。
           </Paragraph>
           <Paragraph>
             <strong>接下来您可以：</strong>
@@ -308,6 +308,7 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
       <div style={{ padding: '20px 0' }}>
         <Steps
           current={currentStep}
+          onChange={setCurrentStep}
           items={guideSteps.map(s => ({
             title: s.title,
             icon: s.icon
