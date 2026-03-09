@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import fs from 'fs-extra';
 import path from 'path';
+import os from 'os';
 import { AgentService } from '../services/agentService';
 import { createError } from '../middleware/errorHandler';
 import type { OpenClawConfig } from '../types';
@@ -12,7 +13,7 @@ import type { OpenClawConfig } from '../types';
 const router = Router();
 const agentService = AgentService.getInstance();
 
-const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
+const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const AGENTS_DIR = path.join(OPENCLAW_ROOT, 'agents');
 
 /**

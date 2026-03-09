@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import fs from 'fs-extra';
 import path from 'path';
+import os from 'os';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { AgentService } from '../services/agentService';
@@ -15,7 +16,7 @@ const router = Router();
 const agentService = AgentService.getInstance();
 const execAsync = promisify(exec);
 
-const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
+const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const AGENTS_DIR = path.join(OPENCLAW_ROOT, 'agents');
 
 /**

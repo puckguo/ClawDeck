@@ -10,6 +10,7 @@ import { promisify } from 'util';
 import { glob } from 'glob';
 import { v4 as uuidv4 } from 'uuid';
 import net from 'net';
+import os from 'os';
 import type {
   OpenClawConfig,
   AgentViewModel,
@@ -22,11 +23,12 @@ import type {
 const execAsync = promisify(exec);
 const isWindows = process.platform === 'win32';
 
-// OpenClaw 根目录
-const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
+// OpenClaw 根目录 - 使用环境变量或默认路径（支持跨平台）
+const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const AGENTS_DIR = path.join(OPENCLAW_ROOT, 'agents');
 const WORKSPACES_DIR = path.join(OPENCLAW_ROOT, 'workspaces');
 const VERSIONS_DIR = path.join(OPENCLAW_ROOT, '.config-versions');
+const LOGS_DIR = process.env.LOGS_DIR || (isWindows ? path.join(os.tmpdir(), 'agent-config-ui') : '/tmp/agent-config-ui');
 
 export class AgentService {
   private static instance: AgentService;
@@ -554,9 +556,7 @@ OPEN_CLAWCHAT_SERVER_URL=${config.channels['open-clawchat'].serverUrl}
       }
 
       // 使用 openclaw gateway 启动，指定配置文件和环境变量
-      const logFile = isWindows
-        ? path.join(agentDir, `${agentId}.log`)
-        : `/tmp/${agentId}.log`;
+      const logFile = path.join(LOGS_DIR, `${agentId}.log`);
 
       // 构建环境变量
       const envVars = {

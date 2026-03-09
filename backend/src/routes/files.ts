@@ -6,11 +6,12 @@
 import { Router } from 'express';
 import fs from 'fs-extra';
 import path from 'path';
+import os from 'os';
 import { createError } from '../middleware/errorHandler';
 
 const router = Router();
 
-const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
+const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const AGENTS_DIR = path.join(OPENCLAW_ROOT, 'agents');
 const WORKSPACES_DIR = path.join(OPENCLAW_ROOT, 'workspaces');
 

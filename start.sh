@@ -12,11 +12,18 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 路径定义
-PROJECT_ROOT="/Users/godspeed/.openclaw/agent-config-ui"
+# 路径定义 - 支持从任何位置运行脚本
+# 使用脚本所在目录的父目录作为项目根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${SCRIPT_DIR}"
 BACKEND_DIR="$PROJECT_ROOT/backend"
 FRONTEND_DIR="$PROJECT_ROOT/frontend"
-LOG_DIR="/tmp/agent-config-ui"
+# 使用跨平台的临时目录
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    LOG_DIR="${TEMP:-/tmp}/agent-config-ui"
+else
+    LOG_DIR="/tmp/agent-config-ui"
+fi
 
 # 创建日志目录
 mkdir -p "$LOG_DIR"

@@ -70,7 +70,7 @@ cd {PROJECT_ROOT}
 #### 1. 安装依赖
 
 ```bash
-cd /Users/godspeed/.openclaw/agent-config-ui
+cd ~/.openclaw/agent-config-ui
 npm run install:all
 ```
 

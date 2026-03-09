@@ -33,7 +33,7 @@ export default function Settings() {
           layout="vertical"
           onFinish={handleSave}
           initialValues={{
-            openclawRoot: '/Users/godspeed/.openclaw',
+            openclawRoot: '~/.openclaw',
             autoRefresh: true,
             refreshInterval: 5
           }}

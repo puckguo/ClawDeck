@@ -5,12 +5,13 @@
 import { Router } from 'express';
 import fs from 'fs-extra';
 import path from 'path';
+import os from 'os';
 import { createError } from '../middleware/errorHandler';
 import type { AgentLog, LogType, LogLevel } from '../types';
 
 const router = Router();
 
-const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
+const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const LOGS_DIR = path.join(OPENCLAW_ROOT, 'logs');
 
 // 内存日志存储（用于实时日志）
