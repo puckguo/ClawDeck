@@ -1,6 +1,9 @@
 # ClawDeck - OpenClaw Agent 配置管理系统
 
-人性化管理 OpenClaw Agent 的 Web 界面，支持查看和修改已有 Agent 配置、创建向导、批量操作、实时监控等功能。
+[![中文](https://img.shields.io/badge/语言-中文-blue)](README.md)
+[![English](https://img.shields.io/badge/Language-English-blue)](README_EN.md)
+
+人性化管理 OpenClaw Agent 的 Web 界面，支持查看和修改已有 Agent 配置、创建向导、批量操作、实时监控、中英双语等功能。
 
 ## 功能特性
 

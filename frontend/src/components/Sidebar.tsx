@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Menu } from 'antd'
+import { useTranslation } from 'react-i18next'
 import {
   TeamOutlined,
   DashboardOutlined,
@@ -7,32 +8,33 @@ import {
   PlusOutlined
 } from '@ant-design/icons'
 
-const menuItems = [
-  {
-    key: '/agents',
-    icon: <TeamOutlined />,
-    label: 'Agent 管理'
-  },
-  {
-    key: '/agents/create',
-    icon: <PlusOutlined />,
-    label: '创建 Agent'
-  },
-  {
-    key: '/monitoring',
-    icon: <DashboardOutlined />,
-    label: '实时监控'
-  },
-  {
-    key: '/settings',
-    icon: <SettingOutlined />,
-    label: '系统设置'
-  }
-]
-
 export default function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { t } = useTranslation()
+
+  const menuItems = [
+    {
+      key: '/agents',
+      icon: <TeamOutlined />,
+      label: t('nav.agentManagement')
+    },
+    {
+      key: '/agents/create',
+      icon: <PlusOutlined />,
+      label: t('nav.createAgent')
+    },
+    {
+      key: '/monitoring',
+      icon: <DashboardOutlined />,
+      label: t('nav.monitoring')
+    },
+    {
+      key: '/settings',
+      icon: <SettingOutlined />,
+      label: t('nav.systemSettings')
+    }
+  ]
 
   // 处理子路由匹配
   const selectedKey = menuItems.find(item =>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   Row,
@@ -30,18 +31,19 @@ import type { AgentViewModel } from '../../../shared/types'
 
 const { Text, Title } = Typography
 
-const statusConfig = {
-  running: { color: 'success', text: '运行中', icon: '🟢' },
-  stopped: { color: 'error', text: '已停止', icon: '🔴' },
-  error: { color: 'warning', text: '异常', icon: '🟠' },
-  configuring: { color: 'processing', text: '配置中', icon: '🟡' }
-}
-
 export default function AgentList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedAgents, setSelectedAgents] = useState<string[]>([])
+
+  const statusConfig = {
+    running: { color: 'success', text: t('status.running'), icon: '🟢' },
+    stopped: { color: 'error', text: t('status.stopped'), icon: '🔴' },
+    error: { color: 'warning', text: t('status.error'), icon: '🟠' },
+    configuring: { color: 'processing', text: t('status.configuring'), icon: '🟡' }
+  }
 
   const { data: agentsData, isLoading } = useQuery(
     'agents',
@@ -62,7 +64,7 @@ export default function AgentList() {
     (id: string) => agentsApi.start(id),
     {
       onSuccess: () => {
-        message.success('启动成功')
+        message.success(t('agentList.messages.startSuccess'))
         queryClient.invalidateQueries('agents')
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -73,7 +75,7 @@ export default function AgentList() {
     (id: string) => agentsApi.stop(id),
     {
       onSuccess: () => {
-        message.success('停止成功')
+        message.success(t('agentList.messages.stopSuccess'))
         queryClient.invalidateQueries('agents')
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -84,7 +86,7 @@ export default function AgentList() {
     (id: string) => agentsApi.restart(id),
     {
       onSuccess: () => {
-        message.success('重启成功')
+        message.success(t('agentList.messages.restartSuccess'))
         queryClient.invalidateQueries('agents')
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -95,7 +97,7 @@ export default function AgentList() {
     (id: string) => agentsApi.delete(id),
     {
       onSuccess: () => {
-        message.success('删除成功')
+        message.success(t('agentList.messages.deleteSuccess'))
         queryClient.invalidateQueries('agents')
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -107,7 +109,7 @@ export default function AgentList() {
       agentsApi.batch(ids, operation),
     {
       onSuccess: () => {
-        message.success('批量操作成功')
+        message.success(t('agentList.messages.batchSuccess'))
         setSelectedAgents([])
         queryClient.invalidateQueries('agents')
       },
@@ -117,7 +119,7 @@ export default function AgentList() {
 
   const handleBatchOperation = (operation: 'start' | 'stop' | 'restart') => {
     if (selectedAgents.length === 0) {
-      message.warning('请先选择 Agent')
+      message.warning(t('agentList.messages.selectFirst'))
       return
     }
     batchMutation.mutate({ ids: selectedAgents, operation })
@@ -130,17 +132,17 @@ export default function AgentList() {
     const menuItems = [
       {
         key: 'manage',
-        label: '管理配置',
+        label: t('agentList.manageConfig'),
         onClick: () => navigate(`/agents/${agent.id}`)
       },
       agent.status === 'running' ? {
         key: 'restart',
-        label: '重启',
+        label: t('common.restart'),
         onClick: () => restartMutation.mutate(agent.id)
       } : null,
       {
         key: 'delete',
-        label: <span style={{ color: '#ff4d4f' }}>删除</span>,
+        label: <span style={{ color: '#ff4d4f' }}>{t('common.delete')}</span>,
         onClick: () => deleteMutation.mutate(agent.id)
       }
     ].filter(Boolean)
@@ -189,21 +191,21 @@ export default function AgentList() {
 
           <Space direction="vertical" style={{ width: '100%' }} size="small">
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Text type="secondary">端口</Text>
+              <Text type="secondary">{t('agentList.port')}</Text>
               <Tag>{agent.port}</Tag>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Text type="secondary">渠道</Text>
+              <Text type="secondary">{t('agentList.channels')}</Text>
               <Space size="small">
-                {agent.channels.feishu && <Tag color="blue">飞书</Tag>}
-                {agent.channels.openClawChat && <Tag color="green">Chat</Tag>}
+                {agent.channels.feishu && <Tag color="blue">{t('channels.feishu')}</Tag>}
+                {agent.channels.openClawChat && <Tag color="green">{t('channels.chat')}</Tag>}
               </Space>
             </div>
 
             {agent.currentRooms.length > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Text type="secondary">房间</Text>
+                <Text type="secondary">{t('agentList.rooms')}</Text>
                 <Space size="small" wrap>
                   {agent.currentRooms.map(room => (
                     <Tag key={room.roomId} color="purple">{room.roomId}</Tag>
@@ -215,11 +217,11 @@ export default function AgentList() {
             {agent.runtimeInfo && (
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text type="secondary">CPU</Text>
+                  <Text type="secondary">{t('agentList.cpu')}</Text>
                   <Text>{agent.runtimeInfo.cpu?.toFixed(1)}%</Text>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Text type="secondary">内存</Text>
+                  <Text type="secondary">{t('agentList.memory')}</Text>
                   <Text>{agent.runtimeInfo.memory?.toFixed(1)}%</Text>
                 </div>
               </>
@@ -235,7 +237,7 @@ export default function AgentList() {
                   onClick={(e) => { e.stopPropagation(); stopMutation.mutate(agent.id) }}
                   loading={stopMutation.isLoading}
                 >
-                  停止
+                  {t('common.stop')}
                 </Button>
                 <Button
                   size="small"
@@ -243,7 +245,7 @@ export default function AgentList() {
                   onClick={(e) => { e.stopPropagation(); restartMutation.mutate(agent.id) }}
                   loading={restartMutation.isLoading}
                 >
-                  重启
+                  {t('common.restart')}
                 </Button>
               </>
             ) : (
@@ -254,7 +256,7 @@ export default function AgentList() {
                 onClick={(e) => { e.stopPropagation(); startMutation.mutate(agent.id) }}
                 loading={startMutation.isLoading}
               >
-                启动
+                {t('common.start')}
               </Button>
             )}
             <Button
@@ -262,7 +264,7 @@ export default function AgentList() {
               icon={<SettingOutlined />}
               onClick={(e) => { e.stopPropagation(); navigate(`/agents/${agent.id}`) }}
             >
-              配置
+              {t('agentList.configure')}
             </Button>
           </div>
         </Card>
@@ -274,14 +276,14 @@ export default function AgentList() {
     <div>
       <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <Title level={2} style={{ marginBottom: '8px' }}>Agent 管理</Title>
+          <Title level={2} style={{ marginBottom: '8px' }}>{t('agentList.title')}</Title>
           <Text type="secondary">
-            共 {agents.length} 个 Agent，
-            <span style={{ color: '#52c41a' }}> {agents.filter(a => a.status === 'running').length} 个运行中</span>
+            {agents.length} {t('monitoring.stats.totalAgents')}，
+            <span style={{ color: '#52c41a' }}> {agents.filter(a => a.status === 'running').length} {t('status.running')}</span>
           </Text>
         </div>
         <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/agents/create')}>
-          创建 Agent
+          {t('nav.createAgent')}
         </Button>
       </div>
 
@@ -289,11 +291,11 @@ export default function AgentList() {
       {selectedAgents.length > 0 && (
         <Card style={{ marginBottom: '16px', backgroundColor: '#f6ffed' }}>
           <Space>
-            <span>已选择 {selectedAgents.length} 个 Agent</span>
-            <Button size="small" onClick={() => handleBatchOperation('start')}>批量启动</Button>
-            <Button size="small" onClick={() => handleBatchOperation('stop')}>批量停止</Button>
-            <Button size="small" onClick={() => handleBatchOperation('restart')}>批量重启</Button>
-            <Button size="small" onClick={() => setSelectedAgents([])}>取消选择</Button>
+            <span>{t('agentList.selectedCount', { count: selectedAgents.length })}</span>
+            <Button size="small" onClick={() => handleBatchOperation('start')}>{t('agentList.batchStart')}</Button>
+            <Button size="small" onClick={() => handleBatchOperation('stop')}>{t('agentList.batchStop')}</Button>
+            <Button size="small" onClick={() => handleBatchOperation('restart')}>{t('agentList.batchRestart')}</Button>
+            <Button size="small" onClick={() => setSelectedAgents([])}>{t('agentList.cancelSelection')}</Button>
           </Space>
         </Card>
       )}
@@ -301,7 +303,7 @@ export default function AgentList() {
       {/* 搜索栏 */}
       <Card style={{ marginBottom: '24px' }}>
         <Input
-          placeholder="搜索 Agent 名称或显示名称"
+          placeholder={t('agentList.searchPlaceholder')}
           prefix={<SearchOutlined />}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -319,11 +321,11 @@ export default function AgentList() {
         <div style={{ textAlign: 'center', padding: '48px' }}>
           <ExclamationCircleOutlined style={{ fontSize: '48px', color: '#d9d9d9' }} />
           <p style={{ marginTop: '16px', color: '#999' }}>
-            {searchTerm ? '没有找到匹配的 Agent' : '还没有创建任何 Agent'}
+            {searchTerm ? t('agentList.noMatch') : t('agentList.noAgents')}
           </p>
           {!searchTerm && (
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/agents/create')}>
-              创建第一个 Agent
+              {t('agentList.createFirst')}
             </Button>
           )}
         </div>

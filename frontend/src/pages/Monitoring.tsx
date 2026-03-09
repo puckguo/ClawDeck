@@ -1,4 +1,5 @@
 import { useQuery } from 'react-query'
+import { useTranslation } from 'react-i18next'
 import { Card, Row, Col, Statistic, Table, Tag, Progress, Typography } from 'antd'
 import {
   TeamOutlined, CheckCircleOutlined, CloseCircleOutlined,
@@ -9,6 +10,7 @@ import { agentsApi } from '../api/agents'
 const { Title } = Typography
 
 export default function Monitoring() {
+  const { t } = useTranslation()
   const { data: agentsData, isLoading } = useQuery(
     'agents',
     () => agentsApi.getAll(),
@@ -24,9 +26,15 @@ export default function Monitoring() {
     .filter(a => a.status === 'running')
     .reduce((sum, a) => sum + (a.runtimeInfo?.memory || 0), 0)
 
+  const statusConfig: Record<string, { color: string; text: string }> = {
+    running: { color: 'success', text: t('status.running') },
+    stopped: { color: 'error', text: t('status.stopped') },
+    error: { color: 'warning', text: t('status.error') }
+  }
+
   const columns = [
     {
-      title: 'Agent',
+      title: t('monitoring.table.agent'),
       dataIndex: 'name',
       render: (_: string, record: any) => (
         <div>
@@ -37,49 +45,44 @@ export default function Monitoring() {
       )
     },
     {
-      title: '状态',
+      title: t('monitoring.table.status'),
       dataIndex: 'status',
       render: (status: string) => {
-        const config: Record<string, { color: string; text: string }> = {
-          running: { color: 'success', text: '运行中' },
-          stopped: { color: 'error', text: '已停止' },
-          error: { color: 'warning', text: '异常' }
-        }
-        const c = config[status] || { color: 'default', text: status }
+        const c = statusConfig[status] || { color: 'default', text: status }
         return <Tag color={c.color}>{c.text}</Tag>
       }
     },
     {
-      title: '端口',
+      title: t('monitoring.table.port'),
       dataIndex: 'port',
       render: (port: number) => <Tag>{port}</Tag>
     },
     {
-      title: 'CPU',
+      title: t('monitoring.table.cpu'),
       dataIndex: ['runtimeInfo', 'cpu'],
       render: (cpu: number) => cpu !== undefined ? (
         <Progress percent={Number(cpu.toFixed(1))} size="small" />
       ) : '-'
     },
     {
-      title: '内存',
+      title: t('monitoring.table.memory'),
       dataIndex: ['runtimeInfo', 'memory'],
       render: (mem: number) => mem !== undefined ? (
         <Progress percent={Number(mem.toFixed(1))} size="small" status="active" />
       ) : '-'
     },
     {
-      title: '房间数',
+      title: t('monitoring.table.roomCount'),
       dataIndex: 'currentRooms',
       render: (rooms: any[]) => rooms.length
     },
     {
-      title: '渠道',
+      title: t('monitoring.table.channels'),
       dataIndex: 'channels',
       render: (channels: any) => (
         <div>
-          {channels.feishu && <Tag>飞书</Tag>}
-          {channels.openClawChat && <Tag>Chat</Tag>}
+          {channels.feishu && <Tag>{t('channels.feishu')}</Tag>}
+          {channels.openClawChat && <Tag>{t('channels.chat')}</Tag>}
         </div>
       )
     }
@@ -88,7 +91,7 @@ export default function Monitoring() {
   return (
     <div>
       <Title level={2} style={{ marginBottom: '24px' }}>
-        <DashboardOutlined /> 实时监控
+        <DashboardOutlined /> {t('monitoring.title')}
       </Title>
 
       {/* 统计卡片 */}
@@ -96,7 +99,7 @@ export default function Monitoring() {
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="总 Agent 数"
+              title={t('monitoring.stats.totalAgents')}
               value={agents.length}
               prefix={<TeamOutlined />}
             />
@@ -105,7 +108,7 @@ export default function Monitoring() {
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="运行中"
+              title={t('monitoring.stats.running')}
               value={runningCount}
               valueStyle={{ color: '#52c41a' }}
               prefix={<CheckCircleOutlined />}
@@ -115,7 +118,7 @@ export default function Monitoring() {
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="已停止"
+              title={t('monitoring.stats.stopped')}
               value={stoppedCount}
               valueStyle={{ color: '#ff4d4f' }}
               prefix={<CloseCircleOutlined />}
@@ -125,7 +128,7 @@ export default function Monitoring() {
         <Col xs={24} sm={12} lg={6}>
           <Card loading={isLoading}>
             <Statistic
-              title="总内存占用"
+              title={t('monitoring.stats.totalMemory')}
               value={totalMemory.toFixed(1)}
               suffix="%"
               prefix={<ExclamationCircleOutlined />}
@@ -135,7 +138,7 @@ export default function Monitoring() {
       </Row>
 
       {/* 详细列表 */}
-      <Card title="Agent 状态详情" loading={isLoading}>
+      <Card title={t('monitoring.section.agentStatus')} loading={isLoading}>
         <Table
           dataSource={agents}
           columns={columns}

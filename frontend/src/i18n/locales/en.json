@@ -1,0 +1,432 @@
+{
+  "common": {
+    "appName": "ClawDeck",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "back": "Back",
+    "next": "Next",
+    "prev": "Previous",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "refresh": "Refresh",
+    "start": "Start",
+    "stop": "Stop",
+    "restart": "Restart",
+    "settings": "Settings",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "info": "Info",
+    "yes": "Yes",
+    "no": "No",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "nav": {
+    "agentManagement": "Agent Management",
+    "createAgent": "Create Agent",
+    "monitoring": "Monitoring",
+    "systemSettings": "System Settings",
+    "guide": "User Guide"
+  },
+  "status": {
+    "running": "Running",
+    "stopped": "Stopped",
+    "error": "Error",
+    "configuring": "Configuring"
+  },
+  "agentList": {
+    "title": "Agent Management",
+    "searchPlaceholder": "Search Agent name or display name",
+    "noAgents": "No Agents created yet",
+    "createFirst": "Create First Agent",
+    "noMatch": "No matching Agents found",
+    "selectedCount": "{{count}} Agents selected",
+    "batchStart": "Batch Start",
+    "batchStop": "Batch Stop",
+    "batchRestart": "Batch Restart",
+    "cancelSelection": "Cancel Selection",
+    "port": "Port",
+    "channels": "Channels",
+    "rooms": "Rooms",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "configure": "Configure",
+    "manageConfig": "Manage Config",
+    "messages": {
+      "startSuccess": "Start successful",
+      "stopSuccess": "Stop successful",
+      "restartSuccess": "Restart successful",
+      "deleteSuccess": "Delete successful",
+      "batchSuccess": "Batch operation successful",
+      "selectFirst": "Please select Agents first"
+    }
+  },
+  "agentDetail": {
+    "tabs": {
+      "overview": "Overview",
+      "basic": "Basic Config",
+      "channels": "Channels",
+      "rooms": "Rooms",
+      "skills": "Skills",
+      "files": "Config Files",
+      "logs": "Logs",
+      "advanced": "Advanced"
+    },
+    "sections": {
+      "basicInfo": "Basic Information",
+      "runtimeStatus": "Runtime Status",
+      "channelConfig": "Channel Configuration",
+      "statistics": "Statistics",
+      "currentRooms": "Current Rooms"
+    },
+    "labels": {
+      "agentId": "Assistant ID",
+      "internalName": "Internal Name",
+      "displayName": "Display Name",
+      "avatar": "Avatar",
+      "servicePort": "Service Port",
+      "configFile": "Config File",
+      "currentStatus": "Current Status",
+      "cpuUsage": "CPU Usage",
+      "memoryUsage": "Memory Usage",
+      "uptime": "Uptime",
+      "installedSkills": "Installed Skills",
+      "roomCount": "Current Rooms",
+      "mdFiles": "MD files",
+      "minutesLeft": "{{time}} minutes left",
+      "owner": "Owner",
+      "member": "Member",
+      "agentName": "Assistant Name",
+      "nameInChat": "Name displayed in chat rooms",
+      "selectAvatar": "Select Avatar",
+      "saveChanges": "Save Changes",
+      "cannotModify": "Assistant ID cannot be modified",
+      "feishuConfig": "Feishu Config",
+      "enableFeishu": "Enable Feishu",
+      "saveConfig": "Save Configuration",
+      "noRooms": "Not joined any rooms",
+      "joinTime": "Join Time",
+      "remainingTime": "Remaining Time",
+      "noSkills": "No skills installed",
+      "skillDesc": "Skill Description",
+      "fileList": "MD File List",
+      "newFile": "New File",
+      "coreFiles": "Core Files",
+      "otherFiles": "Other Files",
+      "fileContent": "File Content",
+      "selectFileToView": "Select a file to view content",
+      "storageLocation": "Storage Location",
+      "agentDir": "agents directory (config related)",
+      "workspaceDir": "workspaces directory (core settings)",
+      "fileCategory": "File Category",
+      "fileName": "File Name",
+      "enterFilename": "Enter filename (without extension)",
+      "searchLogs": "Search logs...",
+      "allTypes": "All Types",
+      "system": "System",
+      "chat": "Chat",
+      "audit": "Audit",
+      "allLevels": "All Levels",
+      "debug": "Debug",
+      "warn": "Warning",
+      "stopRefresh": "Stop Refresh",
+      "autoRefresh": "Auto Refresh",
+      "clear": "Clear",
+      "export": "Export",
+      "noLogs": "No logs",
+      "loadMore": "Load More",
+      "versionManagement": "Version Management",
+      "autoBackup": "System automatically creates version backup on each save",
+      "viewHistory": "View Version History",
+      "dangerZone": "Danger Zone",
+      "resetConfig": "Reset Configuration",
+      "resetWarning": "Reset will restore default configuration, are you sure?",
+      "filePath": "Path",
+      "file": "File"
+    },
+    "confirmations": {
+      "deleteTitle": "Confirm Delete",
+      "deleteMessage": "Cannot recover after deletion, are you sure?",
+      "clearLogsTitle": "Confirm Clear",
+      "clearLogsMessage": "Are you sure you want to clear all logs?"
+    },
+    "messages": {
+      "saveSuccess": "Saved successfully",
+      "loadFileError": "Failed to load file",
+      "saveFileSuccess": "File saved (original backed up)",
+      "saveFileError": "Save failed",
+      "createFileSuccess": "File created successfully",
+      "createFileError": "Create failed",
+      "deleteFileSuccess": "File deleted",
+      "deleteFileError": "Delete failed",
+      "clearLogsSuccess": "Logs cleared"
+    }
+  },
+  "agentCreate": {
+    "title": "Create Your AI Assistant",
+    "steps": {
+      "basic": "Basic Info",
+      "channels": "Channels",
+      "skills": "Configure Skills",
+      "confirm": "Confirm & Start"
+    },
+    "labels": {
+      "agentName": "Assistant Name",
+      "nameHint": "Used for internal identification, English recommended",
+      "enterName": "Please enter assistant name",
+      "displayName": "Display Name",
+      "nameInChat": "Name displayed in chat rooms",
+      "enterDisplayName": "Please enter display name",
+      "selectAvatar": "Select Avatar",
+      "roleDesc": "Role Description",
+      "descHint": "Describe this assistant's responsibilities and characteristics...",
+      "feishu": "Feishu (Lark)",
+      "enableFeishu": "Enable Feishu Connection",
+      "appId": "App ID",
+      "appIdPlaceholder": "cli_xxxxxxxxxxxxxxxx",
+      "appSecret": "App Secret",
+      "howToGet": "How to get Feishu credentials?",
+      "feishuHint": "Create app on Feishu Open Platform to get AppID and AppSecret",
+      "openClawChat": "Open-ClawChat",
+      "enableChat": "Enable Chat Room Feature",
+      "serverUrl": "Server URL",
+      "selectSkills": "Select skills to install:",
+      "coreSkillsNote": "Core skills installed by default, more can be managed after creation",
+      "summary": "Configuration Summary",
+      "feishuStatus": "Feishu Connection",
+      "autoConfig": "Config files will be auto-generated and service port assigned after creation"
+    },
+    "skills": {
+      "roomManager": "Room Management",
+      "roomManagerDesc": "Create/join/exit chat rooms, support Owner creating questions and passwords",
+      "smartCommands": "Smart Commands",
+      "smartCommandsDesc": "Natural language parsing and command execution",
+      "heartbeat": "Heartbeat Detection",
+      "heartbeatDesc": "Automatically manage online duration, auto-exit on timeout"
+    },
+    "buttons": {
+      "back": "Back",
+      "createAndStart": "Create & Start"
+    },
+    "messages": {
+      "createSuccess": "Agent {{name}} created successfully"
+    }
+  },
+  "monitoring": {
+    "title": "Real-time Monitoring",
+    "stats": {
+      "totalAgents": "Total Agents",
+      "running": "Running",
+      "stopped": "Stopped",
+      "totalMemory": "Total Memory Usage"
+    },
+    "table": {
+      "agent": "Agent",
+      "status": "Status",
+      "port": "Port",
+      "cpu": "CPU",
+      "memory": "Memory",
+      "roomCount": "Rooms",
+      "channels": "Channels"
+    },
+    "section": {
+      "agentStatus": "Agent Status Details"
+    }
+  },
+  "settings": {
+    "title": "System Settings",
+    "sections": {
+      "basic": "Basic Settings",
+      "about": "About",
+      "dangerZone": "Danger Zone",
+      "dataManagement": "Data Management"
+    },
+    "labels": {
+      "openclawRoot": "OpenClaw Root Directory",
+      "enterRootPath": "Please enter root directory path",
+      "autoRefresh": "Auto Refresh",
+      "saveSettings": "Save Settings",
+      "version": "Version: {{version}}",
+      "description": "ClawDeck - OpenClaw Agent Configuration Management",
+      "features": {
+        "createEditDelete": "Agent create, edit, delete",
+        "versionManagement": "Configuration version management",
+        "batchOperations": "Batch operations",
+        "realtimeMonitor": "Real-time monitoring",
+        "feishuIntegration": "Feishu integration"
+      },
+      "dangerWarning": "The following operations may affect system operation, please operate with caution.",
+      "clearCache": "Clear All Cache",
+      "rescanAgents": "Rescan Agents"
+    },
+    "messages": {
+      "saveSuccess": "Settings saved",
+      "saveError": "Save failed"
+    }
+  },
+  "guideTour": {
+    "welcome": {
+      "title": "Welcome to ClawDeck",
+      "description": "A web interface for managing OpenClaw Agents.",
+      "features": [
+        "View and manage all Agent statuses",
+        "Edit Agent core config files (SOUL.md, IDENTITY.md, etc.)",
+        "Configure channels (Feishu, Open-ClawChat)",
+        "View operation logs",
+        "Manage skills and workspaces"
+      ],
+      "hint": "Click Next to learn about each feature module."
+    },
+    "steps": {
+      "overview": {
+        "title": "Overview Panel",
+        "description": "Overview panel displays Agent core information:",
+        "items": [
+          "Basic Info: Assistant ID, name, service port, etc.",
+          "Runtime Status: Real-time CPU/memory usage, uptime",
+          "Channel Config: Feishu, Open-ClawChat enabled status",
+          "Statistics: Installed skills, current rooms, config files count"
+        ],
+        "hint": "Status auto-refreshes every 5 seconds to ensure you see the latest data."
+      },
+      "basic": {
+        "title": "Basic Configuration",
+        "description": "Basic configuration sets Agent basic properties:",
+        "items": [
+          "Assistant Name: Internal identifier name",
+          "Display Name: Name shown externally in chat rooms",
+          "Avatar: Select emoji as avatar"
+        ],
+        "hint": "Note: Assistant ID cannot be modified after creation, it's the unique identifier."
+      },
+      "channels": {
+        "title": "Channel Configuration",
+        "description": "Channel configuration manages Agent communication methods:",
+        "feishu": {
+          "name": "Feishu",
+          "items": [
+            "Configure AppID and AppSecret",
+            "Enable/Disable Feishu bot",
+            "Support group and private chat"
+          ]
+        },
+        "chat": {
+          "name": "Open-ClawChat",
+          "items": [
+            "Configure server address",
+            "Set Agent display name",
+            "Manage joined chat rooms"
+          ]
+        }
+      },
+      "files": {
+        "title": "Configuration File Management",
+        "description": "Configuration files are the core of Agent, click files below to edit:",
+        "fileTypes": {
+          "soul": "Soul/Personality",
+          "identity": "Identity",
+          "agents": "Agent Config",
+          "tools": "Tool Config",
+          "memory": "Long-term Memory"
+        },
+        "backup": "Auto Backup: System automatically creates backup to .backups/ directory on each modification."
+      },
+      "logs": {
+        "title": "Operation Logs",
+        "description": "Operation logs help you monitor Agent running status:",
+        "items": [
+          "Log Levels: Debug / Info / Warning / Error",
+          "Log Types: System / Chat / Error / Audit",
+          "Search Filter: Quickly locate logs of interest",
+          "Auto Refresh: View latest logs in real-time",
+          "Export: Export logs for analysis"
+        ],
+        "hint": "Logs are displayed in timeline format, newest logs at the top."
+      },
+      "actions": {
+        "title": "Quick Actions",
+        "description": "Common operation buttons:",
+        "items": [
+          "Start: Start Agent service",
+          "Stop: Stop Agent service",
+          "Restart: Restart Agent service",
+          "Delete: Delete Agent (moves to trash)"
+        ],
+        "hint": "Dangerous operations (delete) have secondary confirmation to avoid accidents."
+      },
+      "finish": {
+        "title": "Get Started",
+        "congrats": "Congratulations!",
+        "description": "You have learned ClawDeck's core features.",
+        "nextSteps": [
+          "View overview to understand Agent current status",
+          "Edit SOUL.md to customize Agent personality",
+          "Configure channels to connect Agent to chat platforms",
+          "View logs to monitor running status"
+        ],
+        "hint": "To view this guide again, click the User Guide button in the top right."
+      }
+    },
+    "buttons": {
+      "skip": "Skip Guide",
+      "finish": "Finish",
+      "step": "Step"
+    }
+  },
+  "fileDescriptions": {
+    "SOUL.md": {
+      "name": "Soul/Personality",
+      "description": "Define Agent's personality, tone, behavior style and other core characteristics"
+    },
+    "IDENTITY.md": {
+      "name": "Identity",
+      "description": "Agent's name, identity, background story and other basic information"
+    },
+    "AGENTS.md": {
+      "name": "Agent Config",
+      "description": "Sub-agent definition and division configuration"
+    },
+    "TOOLS.md": {
+      "name": "Tool Config",
+      "description": "Available tool definitions and parameter configuration"
+    },
+    "USER.md": {
+      "name": "User Definition",
+      "description": "User information and usage preference settings"
+    },
+    "BOOTSTRAP.md": {
+      "name": "Bootstrap Config",
+      "description": "Initialization configuration and commands when Agent starts"
+    },
+    "HEARTBEAT.md": {
+      "name": "Heartbeat Config",
+      "description": "Scheduled tasks and status report configuration"
+    },
+    "CRON.md": {
+      "name": "Scheduled Tasks",
+      "description": "Periodically executed task configuration"
+    },
+    "memory.md": {
+      "name": "Long-term Memory",
+      "description": "Agent's long-term memory storage (agents directory)"
+    },
+    "MEMORY.md": {
+      "name": "Working Memory",
+      "description": "Agent's working memory and context information (workspaces directory)"
+    },
+    "SKILL.md": {
+      "name": "Skill Description",
+      "description": "Detailed description and usage methods of specific skills"
+    }
+  },
+  "channels": {
+    "feishu": "Feishu",
+    "chat": "Chat"
+  }
+}

@@ -1,0 +1,432 @@
+{
+  "common": {
+    "appName": "ClawDeck",
+    "loading": "加载中...",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "back": "返回",
+    "next": "下一步",
+    "prev": "上一步",
+    "confirm": "确认",
+    "close": "关闭",
+    "search": "搜索",
+    "refresh": "刷新",
+    "start": "启动",
+    "stop": "停止",
+    "restart": "重启",
+    "settings": "设置",
+    "success": "成功",
+    "error": "错误",
+    "warning": "警告",
+    "info": "信息",
+    "yes": "是",
+    "no": "否",
+    "enabled": "已启用",
+    "disabled": "未启用"
+  },
+  "nav": {
+    "agentManagement": "Agent 管理",
+    "createAgent": "创建 Agent",
+    "monitoring": "实时监控",
+    "systemSettings": "系统设置",
+    "guide": "使用向导"
+  },
+  "status": {
+    "running": "运行中",
+    "stopped": "已停止",
+    "error": "异常",
+    "configuring": "配置中"
+  },
+  "agentList": {
+    "title": "Agent 管理",
+    "searchPlaceholder": "搜索 Agent 名称或显示名称",
+    "noAgents": "还没有创建任何 Agent",
+    "createFirst": "创建第一个 Agent",
+    "noMatch": "没有找到匹配的 Agent",
+    "selectedCount": "已选择 {{count}} 个 Agent",
+    "batchStart": "批量启动",
+    "batchStop": "批量停止",
+    "batchRestart": "批量重启",
+    "cancelSelection": "取消选择",
+    "port": "端口",
+    "channels": "渠道",
+    "rooms": "房间",
+    "cpu": "CPU",
+    "memory": "内存",
+    "configure": "配置",
+    "manageConfig": "管理配置",
+    "messages": {
+      "startSuccess": "启动成功",
+      "stopSuccess": "停止成功",
+      "restartSuccess": "重启成功",
+      "deleteSuccess": "删除成功",
+      "batchSuccess": "批量操作成功",
+      "selectFirst": "请先选择 Agent"
+    }
+  },
+  "agentDetail": {
+    "tabs": {
+      "overview": "概览",
+      "basic": "基础配置",
+      "channels": "渠道配置",
+      "rooms": "聊天室",
+      "skills": "技能",
+      "files": "配置文件",
+      "logs": "运行日志",
+      "advanced": "高级"
+    },
+    "sections": {
+      "basicInfo": "基本信息",
+      "runtimeStatus": "运行状态",
+      "channelConfig": "渠道配置",
+      "statistics": "统计信息",
+      "currentRooms": "当前房间"
+    },
+    "labels": {
+      "agentId": "助手ID",
+      "internalName": "内部名称",
+      "displayName": "显示名称",
+      "avatar": "形象",
+      "servicePort": "服务端口",
+      "configFile": "配置文件",
+      "currentStatus": "当前状态",
+      "cpuUsage": "CPU使用率",
+      "memoryUsage": "内存使用率",
+      "uptime": "运行时长",
+      "installedSkills": "已安装技能",
+      "roomCount": "当前房间数",
+      "mdFiles": "个MD文件",
+      "minutesLeft": "剩余 {{time}} 分钟",
+      "owner": "房主",
+      "member": "成员",
+      "agentName": "助手名称",
+      "nameInChat": "在聊天室中显示的名字",
+      "selectAvatar": "选择形象",
+      "saveChanges": "保存修改",
+      "cannotModify": "助手ID不可修改",
+      "feishuConfig": "飞书配置",
+      "enableFeishu": "启用飞书",
+      "saveConfig": "保存配置",
+      "noRooms": "未加入任何房间",
+      "joinTime": "加入时间",
+      "remainingTime": "剩余时间",
+      "noSkills": "暂无技能",
+      "skillDesc": "技能描述",
+      "fileList": "MD 文件列表",
+      "newFile": "新建",
+      "coreFiles": "核心文件",
+      "otherFiles": "其他文件",
+      "fileContent": "文件内容",
+      "selectFileToView": "选择一个文件查看内容",
+      "storageLocation": "存储位置",
+      "agentDir": "agents 目录（配置相关）",
+      "workspaceDir": "workspaces 目录（核心设定）",
+      "fileCategory": "文件类别",
+      "fileName": "文件名称",
+      "enterFilename": "输入文件名（不含扩展名）",
+      "searchLogs": "搜索日志...",
+      "allTypes": "所有类型",
+      "system": "系统",
+      "chat": "聊天",
+      "audit": "审计",
+      "allLevels": "所有级别",
+      "debug": "调试",
+      "warn": "警告",
+      "stopRefresh": "停止刷新",
+      "autoRefresh": "自动刷新",
+      "clear": "清空",
+      "export": "导出",
+      "noLogs": "暂无日志",
+      "loadMore": "加载更多",
+      "versionManagement": "配置版本管理",
+      "autoBackup": "每次保存配置时，系统会自动创建版本备份",
+      "viewHistory": "查看版本历史",
+      "dangerZone": "危险区域",
+      "resetConfig": "重置配置",
+      "resetWarning": "重置将恢复到默认配置，确定吗？",
+      "filePath": "路径",
+      "file": "文件"
+    },
+    "confirmations": {
+      "deleteTitle": "确认删除",
+      "deleteMessage": "删除后无法恢复，确定要删除吗？",
+      "clearLogsTitle": "确认清空",
+      "clearLogsMessage": "确定要清空所有日志吗？"
+    },
+    "messages": {
+      "saveSuccess": "保存成功",
+      "loadFileError": "读取文件失败",
+      "saveFileSuccess": "文件保存成功（已备份原文件）",
+      "saveFileError": "保存失败",
+      "createFileSuccess": "文件创建成功",
+      "createFileError": "创建失败",
+      "deleteFileSuccess": "文件已删除",
+      "deleteFileError": "删除失败",
+      "clearLogsSuccess": "日志已清空"
+    }
+  },
+  "agentCreate": {
+    "title": "创建你的 AI 助手",
+    "steps": {
+      "basic": "基础信息",
+      "channels": "消息渠道",
+      "skills": "配置技能",
+      "confirm": "确认启动"
+    },
+    "labels": {
+      "agentName": "助手名称",
+      "nameHint": "用于内部标识，建议使用英文",
+      "enterName": "请输入助手名称",
+      "displayName": "显示名称",
+      "nameInChat": "在聊天室中显示的名字",
+      "enterDisplayName": "请输入显示名称",
+      "selectAvatar": "选择形象",
+      "roleDesc": "角色描述",
+      "descHint": "描述这个助手的职责和特点...",
+      "feishu": "飞书（Lark）",
+      "enableFeishu": "启用飞书连接",
+      "appId": "应用ID",
+      "appIdPlaceholder": "cli_xxxxxxxxxxxxxxxx",
+      "appSecret": "应用密钥",
+      "howToGet": "如何获取飞书凭证？",
+      "feishuHint": "在飞书开放平台创建应用，获取 AppID 和 AppSecret",
+      "openClawChat": "Open-ClawChat",
+      "enableChat": "启用聊天室功能",
+      "serverUrl": "服务器地址",
+      "selectSkills": "选择要安装的技能：",
+      "coreSkillsNote": "默认已安装核心技能，创建后可以在配置页面管理更多技能",
+      "summary": "配置摘要",
+      "feishuStatus": "飞书连接",
+      "autoConfig": "创建后将自动生成配置文件并分配服务端口"
+    },
+    "skills": {
+      "roomManager": "房间管理",
+      "roomManagerDesc": "创建/加入/退出聊天室，支持 Owner 身份创建问题和密码",
+      "smartCommands": "智能命令",
+      "smartCommandsDesc": "自然语言解析和执行命令",
+      "heartbeat": "心跳检测",
+      "heartbeatDesc": "自动管理在线时长，超时自动退出"
+    },
+    "buttons": {
+      "back": "返回",
+      "createAndStart": "创建并启动"
+    },
+    "messages": {
+      "createSuccess": "Agent {{name}} 创建成功"
+    }
+  },
+  "monitoring": {
+    "title": "实时监控",
+    "stats": {
+      "totalAgents": "总 Agent 数",
+      "running": "运行中",
+      "stopped": "已停止",
+      "totalMemory": "总内存占用"
+    },
+    "table": {
+      "agent": "Agent",
+      "status": "状态",
+      "port": "端口",
+      "cpu": "CPU",
+      "memory": "内存",
+      "roomCount": "房间数",
+      "channels": "渠道"
+    },
+    "section": {
+      "agentStatus": "Agent 状态详情"
+    }
+  },
+  "settings": {
+    "title": "系统设置",
+    "sections": {
+      "basic": "基本设置",
+      "about": "关于",
+      "dangerZone": "危险区域",
+      "dataManagement": "数据管理"
+    },
+    "labels": {
+      "openclawRoot": "OpenClaw 根目录",
+      "enterRootPath": "请输入根目录路径",
+      "autoRefresh": "自动刷新",
+      "saveSettings": "保存设置",
+      "version": "版本: {{version}}",
+      "description": "ClawDeck - OpenClaw Agent 配置管理",
+      "features": {
+        "createEditDelete": "Agent 创建、编辑、删除",
+        "versionManagement": "配置版本管理",
+        "batchOperations": "批量操作",
+        "realtimeMonitor": "实时监控",
+        "feishuIntegration": "飞书集成"
+      },
+      "dangerWarning": "以下操作可能影响系统正常运行，请谨慎操作。",
+      "clearCache": "清除所有缓存",
+      "rescanAgents": "重新扫描 Agent"
+    },
+    "messages": {
+      "saveSuccess": "设置已保存",
+      "saveError": "保存失败"
+    }
+  },
+  "guideTour": {
+    "welcome": {
+      "title": "欢迎使用 ClawDeck",
+      "description": "这是一个用于管理 OpenClaw Agent 的 Web 界面。",
+      "features": [
+        "查看和管理所有 Agent 的状态",
+        "编辑 Agent 的核心配置文件（SOUL.md、IDENTITY.md 等）",
+        "配置渠道（飞书、Open-ClawChat）",
+        "查看运行日志",
+        "管理技能和工作空间"
+      ],
+      "hint": "点击下一步开始了解各个功能模块。"
+    },
+    "steps": {
+      "overview": {
+        "title": "概览面板",
+        "description": "概览面板显示 Agent 的核心信息：",
+        "items": [
+          "基本信息：助手ID、名称、服务端口等",
+          "运行状态：实时显示 CPU/内存使用率、运行时长",
+          "渠道配置：飞书、Open-ClawChat 启用状态",
+          "统计信息：已安装技能数、当前房间数、配置文件数"
+        ],
+        "hint": "状态每 5 秒自动刷新，确保您看到最新的运行数据。"
+      },
+      "basic": {
+        "title": "基础配置",
+        "description": "基础配置用于设置 Agent 的基本属性：",
+        "items": [
+          "助手名称：内部使用的标识名称",
+          "显示名称：在聊天室中对外展示的名字",
+          "形象标识：选择emoji作为头像"
+        ],
+        "hint": "注意：助手ID创建后不可修改，这是 Agent 的唯一标识。"
+      },
+      "channels": {
+        "title": "渠道配置",
+        "description": "渠道配置管理 Agent 与外界的通信方式：",
+        "feishu": {
+          "name": "飞书",
+          "items": [
+            "配置 AppID 和 AppSecret",
+            "启用/禁用飞书机器人",
+            "支持群聊和私聊"
+          ]
+        },
+        "chat": {
+          "name": "Open-ClawChat",
+          "items": [
+            "配置服务器地址",
+            "设置 Agent 显示名称",
+            "管理加入的聊天室"
+          ]
+        }
+      },
+      "files": {
+        "title": "配置文件管理",
+        "description": "配置文件是 Agent 的核心，点击下列文件可直接编辑：",
+        "fileTypes": {
+          "soul": "性格设定",
+          "identity": "身份信息",
+          "agents": "代理配置",
+          "tools": "工具配置",
+          "memory": "长期记忆"
+        },
+        "backup": "自动备份：每次修改文件时，系统会自动创建备份到 .backups/ 目录。"
+      },
+      "logs": {
+        "title": "运行日志",
+        "description": "运行日志帮助您监控 Agent 的运行状况：",
+        "items": [
+          "日志级别：调试 / 信息 / 警告 / 错误",
+          "日志类型：系统 / 聊天 / 错误 / 审计",
+          "搜索过滤：快速定位感兴趣的日志",
+          "自动刷新：实时查看最新日志",
+          "导出功能：导出日志用于分析"
+        ],
+        "hint": "日志以时间线形式展示，最新的日志在最上方。"
+      },
+      "actions": {
+        "title": "快速操作",
+        "description": "常用操作按钮：",
+        "items": [
+          "启动：启动 Agent 服务",
+          "停止：停止 Agent 服务",
+          "重启：重启 Agent 服务",
+          "删除：删除 Agent（会移动到回收站）"
+        ],
+        "hint": "危险操作（删除）会有二次确认，避免误操作。"
+      },
+      "finish": {
+        "title": "开始使用",
+        "congrats": "恭喜！",
+        "description": "您已经了解了 ClawDeck 的核心功能。",
+        "nextSteps": [
+          "查看概览了解 Agent 当前状态",
+          "编辑 SOUL.md 定制 Agent 性格",
+          "配置渠道让 Agent 接入聊天平台",
+          "查看日志监控运行状况"
+        ],
+        "hint": "如需再次查看此向导，点击右上角的使用向导按钮。"
+      }
+    },
+    "buttons": {
+      "skip": "跳过向导",
+      "finish": "完成",
+      "step": "步骤"
+    }
+  },
+  "fileDescriptions": {
+    "SOUL.md": {
+      "name": "性格设定",
+      "description": "定义 Agent 的性格、语气、行为风格等核心特质"
+    },
+    "IDENTITY.md": {
+      "name": "身份信息",
+      "description": "Agent 的名称、身份、背景故事等基本信息"
+    },
+    "AGENTS.md": {
+      "name": "代理配置",
+      "description": "子代理定义和分工配置"
+    },
+    "TOOLS.md": {
+      "name": "工具配置",
+      "description": "可用工具的定义和参数配置"
+    },
+    "USER.md": {
+      "name": "用户定义",
+      "description": "用户信息和使用偏好设置"
+    },
+    "BOOTSTRAP.md": {
+      "name": "启动配置",
+      "description": "Agent 启动时的初始化配置和指令"
+    },
+    "HEARTBEAT.md": {
+      "name": "心跳配置",
+      "description": "定时任务和状态报告配置"
+    },
+    "CRON.md": {
+      "name": "定时任务",
+      "description": "周期性执行的任务配置"
+    },
+    "memory.md": {
+      "name": "长期记忆",
+      "description": "Agent 的长期记忆存储（agents 目录）"
+    },
+    "MEMORY.md": {
+      "name": "工作记忆",
+      "description": "Agent 的工作记忆和上下文信息（workspaces 目录）"
+    },
+    "SKILL.md": {
+      "name": "技能说明",
+      "description": "特定技能的详细说明和使用方法"
+    }
+  },
+  "channels": {
+    "feishu": "飞书",
+    "chat": "Chat"
+  }
+}
