@@ -9,6 +9,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { glob } from 'glob';
 import { v4 as uuidv4 } from 'uuid';
+import net from 'net';
 import type {
   OpenClawConfig,
   AgentViewModel,
@@ -19,6 +20,7 @@ import type {
 } from '../types';
 
 const execAsync = promisify(exec);
+const isWindows = process.platform === 'win32';
 
 // OpenClaw 根目录
 const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || '/Users/godspeed/.openclaw';
@@ -154,17 +156,87 @@ export class AgentService {
    */
   private async getAgentStatus(agentId: string, port: number): Promise<AgentStatus> {
     try {
-      // 检查端口是否被监听
-      const { stdout: portCheck } = await execAsync(`lsof -i :${port} | grep LISTEN || true`);
-      if (!portCheck.trim()) {
-        return 'stopped';
-      }
-
-      // 端口正在监听，说明 agent 在运行
-      return 'running';
+      const isListening = await this.checkPortListening(port);
+      return isListening ? 'running' : 'stopped';
     } catch {
       return 'stopped';
     }
+  }
+
+  /**
+   * 检查端口是否被监听（跨平台）
+   */
+  private async checkPortListening(port: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
+      socket.setTimeout(1000);
+
+      socket.on('connect', () => {
+        socket.destroy();
+        resolve(true);
+      });
+
+      socket.on('error', () => {
+        resolve(false);
+      });
+
+      socket.on('timeout', () => {
+        socket.destroy();
+        resolve(false);
+      });
+
+      socket.connect(port, '127.0.0.1');
+    });
+  }
+
+  /**
+   * 查找占用端口的 PID（跨平台）
+   */
+  private async findPidByPort(port: number): Promise<number | null> {
+    try {
+      if (isWindows) {
+        const { stdout } = await execAsync(`netstat -ano | findstr :${port}`);
+        const lines = stdout.trim().split('\n').filter(line => line.includes('LISTENING'));
+        if (lines.length > 0) {
+          const parts = lines[0].trim().split(/\s+/);
+          const pid = parseInt(parts[parts.length - 1]);
+          return isNaN(pid) ? null : pid;
+        }
+      } else {
+        const { stdout } = await execAsync(`lsof -i :${port} -t 2>/dev/null || true`);
+        const pid = parseInt(stdout.trim());
+        return isNaN(pid) ? null : pid;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  }
+
+  /**
+   * 查找进程 PID 通过名称（跨平台）
+   */
+  private async findPidByName(name: string): Promise<number | null> {
+    try {
+      if (isWindows) {
+        const { stdout } = await execAsync(`tasklist /FI "IMAGENAME eq openclaw.exe" /FO CSV /NH`);
+        const lines = stdout.trim().split('\n');
+        for (const line of lines) {
+          if (line.toLowerCase().includes(name.toLowerCase())) {
+            const parts = line.replace(/"/g, '').split(',');
+            const pid = parseInt(parts[1]);
+            if (!isNaN(pid)) return pid;
+          }
+        }
+      } else {
+        const { stdout } = await execAsync(`pgrep -f "openclaw.*${name}" 2>/dev/null | head -1 || true`);
+        const pid = parseInt(stdout.trim());
+        return isNaN(pid) ? null : pid;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
   }
 
   /**
@@ -172,25 +244,57 @@ export class AgentService {
    */
   private async getRuntimeInfo(agentId: string, port: number): Promise<AgentViewModel['runtimeInfo']> {
     try {
-      const { stdout } = await execAsync(`pgrep -f "openclaw.*${agentId}" | head -1`);
-      const pid = parseInt(stdout.trim());
+      // 先通过端口查找 PID
+      let pid = await this.findPidByPort(port);
+
+      // 如果找不到，尝试通过进程名查找
+      if (!pid) {
+        pid = await this.findPidByName(agentId);
+      }
 
       if (pid) {
-        // 获取进程信息
-        const { stdout: psInfo } = await execAsync(`ps -p ${pid} -o pid,pcpu,pmem,etime | tail -1`);
-        const parts = psInfo.trim().split(/\s+/);
-
-        return {
-          pid,
-          cpu: parseFloat(parts[1]) || 0,
-          memory: parseFloat(parts[2]) || 0,
-          uptime: this.parseUptime(parts[3] || '')
-        };
+        const info = await this.getProcessInfo(pid);
+        return { pid, ...info };
       }
     } catch (error) {
       console.error(`Failed to get runtime info for ${agentId}:`, error);
     }
     return {};
+  }
+
+  /**
+   * 获取进程信息（跨平台）
+   */
+  private async getProcessInfo(pid: number): Promise<{ cpu: number; memory: number; uptime: number }> {
+    try {
+      if (isWindows) {
+        // Windows 上使用 PowerShell 获取进程信息
+        const { stdout } = await execAsync(
+          `powershell -Command "Get-Process -Id ${pid} | Select-Object CPU, WorkingSet, StartTime | ConvertTo-Json"`
+        );
+        const data = JSON.parse(stdout);
+        const workingSetMB = (data.WorkingSet || 0) / (1024 * 1024);
+        const totalMemMB = require('os').totalmem() / (1024 * 1024);
+        const memoryPercent = (workingSetMB / totalMemMB) * 100;
+
+        return {
+          cpu: data.CPU || 0,
+          memory: parseFloat(memoryPercent.toFixed(1)),
+          uptime: data.StartTime ? Math.floor((Date.now() - new Date(data.StartTime).getTime()) / 1000) : 0
+        };
+      } else {
+        const { stdout } = await execAsync(`ps -p ${pid} -o pid,pcpu,pmem,etime 2>/dev/null | tail -1 || true`);
+        const parts = stdout.trim().split(/\s+/);
+
+        return {
+          cpu: parseFloat(parts[1]) || 0,
+          memory: parseFloat(parts[2]) || 0,
+          uptime: this.parseUptime(parts[3] || '')
+        };
+      }
+    } catch {
+      return { cpu: 0, memory: 0, uptime: 0 };
+    }
   }
 
   /**
@@ -444,29 +548,45 @@ OPEN_CLAWCHAT_SERVER_URL=${config.channels['open-clawchat'].serverUrl}
 
     try {
       // 检查端口是否已被占用
-      const { stdout: portCheck } = await execAsync(`lsof -i :${port} | grep LISTEN || true`);
-      if (portCheck.trim()) {
+      const isPortInUse = await this.checkPortListening(port);
+      if (isPortInUse) {
         throw new Error(`Port ${port} is already in use`);
       }
 
       // 使用 openclaw gateway 启动，指定配置文件和环境变量
-      const envFile = path.join(agentDir, '.env');
-      const logFile = `/tmp/${agentId}.log`;
+      const logFile = isWindows
+        ? path.join(agentDir, `${agentId}.log`)
+        : `/tmp/${agentId}.log`;
 
-      // 构建启动命令
-      const cmd = `cd ${agentDir} && \
-export OPENCLAW_CONFIG_PATH=${configPath} && \
-export OPENCLAW_STATE_DIR=${agentDir} && \
-nohup openclaw gateway --port ${port} > ${logFile} 2>&1 &`;
+      // 构建环境变量
+      const envVars = {
+        OPENCLAW_CONFIG_PATH: configPath,
+        OPENCLAW_STATE_DIR: agentDir,
+        ...process.env
+      };
 
-      await execAsync(cmd);
+      if (isWindows) {
+        // Windows: 使用 PowerShell 后台启动
+        const envStr = Object.entries(envVars)
+          .map(([k, v]) => `$env:${k} = "${v}"`)
+          .join('; ');
+        const cmd = `powershell -Command "${envStr}; Start-Process -FilePath 'openclaw' -ArgumentList 'gateway','--port','${port}' -WindowStyle Hidden -RedirectStandardOutput '${logFile}' -RedirectStandardError '${logFile}'"`;
+        await execAsync(cmd);
+      } else {
+        // macOS/Linux: 使用 nohup 后台启动
+        const envStr = Object.entries(envVars)
+          .map(([k, v]) => `export ${k}="${v}"`)
+          .join(' && ');
+        const cmd = `${envStr} && nohup openclaw gateway --port ${port} > "${logFile}" 2>&1 &`;
+        await execAsync(cmd);
+      }
 
       // 等待启动并验证
       await new Promise(resolve => setTimeout(resolve, 3000));
 
       // 检查端口是否已监听
-      const { stdout: verifyCheck } = await execAsync(`lsof -i :${port} | grep LISTEN || true`);
-      if (!verifyCheck.trim()) {
+      const isRunning = await this.checkPortListening(port);
+      if (!isRunning) {
         // 读取日志获取错误信息
         let logContent = '';
         try {
@@ -492,11 +612,22 @@ nohup openclaw gateway --port ${port} > ${logFile} 2>&1 &`;
    */
   async stopAgent(agentId: string): Promise<void> {
     try {
-      const { stdout } = await execAsync(`pgrep -f "openclaw.*${agentId}" || true`);
-      const pids = stdout.trim().split('\n').filter(Boolean);
+      // 获取 Agent 配置以查找端口
+      const config = await this.getAgentConfig(agentId);
+      const port = config?.gateway?.port;
 
-      for (const pid of pids) {
-        await execAsync(`kill -TERM ${pid} || true`);
+      // 先尝试通过端口查找 PID 并停止
+      if (port) {
+        const pid = await this.findPidByPort(port);
+        if (pid) {
+          await this.killProcess(pid);
+        }
+      }
+
+      // 再通过进程名查找并停止
+      const pid = await this.findPidByName(agentId);
+      if (pid) {
+        await this.killProcess(pid);
       }
 
       // 等待停止
@@ -506,6 +637,21 @@ nohup openclaw gateway --port ${port} > ${logFile} 2>&1 &`;
       await this.scanAgents();
     } catch (error) {
       throw new Error(`Failed to stop agent: ${error}`);
+    }
+  }
+
+  /**
+   * 终止进程（跨平台）
+   */
+  private async killProcess(pid: number): Promise<void> {
+    try {
+      if (isWindows) {
+        await execAsync(`taskkill /PID ${pid} /F /T`);
+      } else {
+        await execAsync(`kill -TERM ${pid} 2>/dev/null || kill -9 ${pid} 2>/dev/null || true`);
+      }
+    } catch {
+      // ignore errors when killing process
     }
   }
 
