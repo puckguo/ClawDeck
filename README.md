@@ -2,8 +2,6 @@
 
 人性化管理 OpenClaw Agent 的 Web 界面，支持查看和修改已有 Agent 配置、创建向导、批量操作、实时监控等功能。
 
-> **ClawDeck** = Claw (爪子) + Deck (甲板/指挥台)，寓意统揽全局的 OpenClaw 指挥控制中心
-
 ## 功能特性
 
 ### 核心功能
