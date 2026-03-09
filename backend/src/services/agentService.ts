@@ -430,23 +430,60 @@ OPEN_CLAWCHAT_SERVER_URL=${config.channels['open-clawchat'].serverUrl}
       throw new Error(`Agent ${agentId} not found`);
     }
 
-    const startScript = '/tmp/start-agent-py.py';
-    if (!await fs.pathExists(startScript)) {
-      throw new Error('Start script not found');
+    const configPath = path.join(agentDir, 'openclaw.json');
+    if (!await fs.pathExists(configPath)) {
+      throw new Error(`Agent configuration not found for ${agentId}`);
+    }
+
+    // 读取配置获取端口
+    const config = await fs.readJson(configPath);
+    const port = config.gateway?.port;
+    if (!port) {
+      throw new Error(`Gateway port not configured for agent ${agentId}`);
     }
 
     try {
-      // 使用 pm2 或 nohup 启动
-      const cmd = `cd ${agentDir} && python3 ${startScript} ${agentId} > /tmp/${agentId}.log 2>&1 &`;
+      // 检查端口是否已被占用
+      const { stdout: portCheck } = await execAsync(`lsof -i :${port} | grep LISTEN || true`);
+      if (portCheck.trim()) {
+        throw new Error(`Port ${port} is already in use`);
+      }
+
+      // 使用 openclaw gateway 启动，指定配置文件和环境变量
+      const envFile = path.join(agentDir, '.env');
+      const logFile = `/tmp/${agentId}.log`;
+
+      // 构建启动命令
+      const cmd = `cd ${agentDir} && \
+export OPENCLAW_CONFIG_PATH=${configPath} && \
+export OPENCLAW_STATE_DIR=${agentDir} && \
+nohup openclaw gateway --port ${port} > ${logFile} 2>&1 &`;
+
       await execAsync(cmd);
 
-      // 等待启动
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 等待启动并验证
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // 检查端口是否已监听
+      const { stdout: verifyCheck } = await execAsync(`lsof -i :${port} | grep LISTEN || true`);
+      if (!verifyCheck.trim()) {
+        // 读取日志获取错误信息
+        let logContent = '';
+        try {
+          logContent = await fs.readFile(logFile, 'utf-8');
+        } catch {
+          // ignore
+        }
+        throw new Error(`Agent failed to start. Check logs at ${logFile}. ${logContent.slice(-500)}`);
+      }
 
       // 刷新缓存
       await this.scanAgents();
-    } catch (error) {
-      throw new Error(`Failed to start agent: ${error}`);
+    } catch (error: any) {
+      if (error.message?.includes('already in use')) {
+        throw error;
+      }
+      throw new Error(`Failed to start agent: ${error.message || error}`);
     }
   }
 
