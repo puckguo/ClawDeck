@@ -32,6 +32,13 @@
 
 ## 快速开始
 
+### 配置指南
+
+在开始之前，请先阅读 **[配置指南](CONFIG_GUIDE.md)** 了解如何正确配置：
+- AI 模型（Kimi、DeepSeek 等）
+- 飞书集成
+- 常见问题排查
+
 ### AI 自动部署（推荐）
 
 让 OpenClaw 或 Claude Code 读取部署指南并自动执行：
@@ -111,6 +118,7 @@ agent-config-ui/
 │   │   └── App.tsx      # 主应用
 │   └── package.json
 ├── agent/               # 配置管理 Agent（IM 对话）
+├── CONFIG_GUIDE.md      # 配置指南（AI模型/飞书等）
 ├── DEPLOY.md            # AI 部署指南
 └── README.md
 ```
@@ -163,10 +171,10 @@ agent-config-ui/
 - [x] 基础架构搭建
 - [x] Agent 列表与 CRUD
 - [x] 多标签配置编辑
+- [x] 飞书集成
 - [ ] 技能管理
 - [ ] 配置版本管理
 - [ ] 日志查看
-- [ ] 飞书集成
 - [ ] 多维表格同步
 
 ## License

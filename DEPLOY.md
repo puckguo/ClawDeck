@@ -6,6 +6,27 @@
 
 在当前项目的 `clawdeck` 目录部署 ClawDeck 系统，并启动服务。
 
+## 配置准备
+
+在部署之前，请先阅读 **[CONFIG_GUIDE.md](CONFIG_GUIDE.md)** 了解：
+- 如何配置 AI 模型（Kimi、DeepSeek 等）
+- 如何配置飞书集成
+- 常见问题排查方法
+
+### 快速配置检查清单
+
+部署 Agent 前，请确认以下配置：
+
+**AI 模型配置**：
+- [ ] 如果使用 Kimi，provider 应为 `kimi-coding`，模型应为 `k2p5`
+- [ ] 如果使用 DeepSeek，provider 为 `deepseek`，模型为 `deepseek-chat`
+- [ ] API Key 已正确设置
+
+**飞书配置**（可选）：
+- [ ] 飞书开放平台已创建应用并获取 App ID 和 App Secret
+- [ ] 事件订阅方式设置为"长连接（WebSocket）"
+- [ ] 已订阅 `im.message.receive_v1` 事件
+
 **项目路径**: `{OPENCLAW_ROOT}/agent-config-ui`
 
 （`{OPENCLAW_ROOT}` 为 OpenClaw 安装根目录，默认为 `~/.openclaw`）
@@ -125,6 +146,39 @@ rm -rf backend/node_modules frontend/node_modules
 cat /tmp/agent-config-ui/backend.log
 ```
 
+### 飞书发送消息返回 404
+
+这是最常见的配置问题，通常是 AI 模型配置错误导致。
+
+**解决方案**：
+1. 检查 Agent 日志确认错误来源
+2. 如果使用 Kimi，确保：
+   - provider: `kimi-coding`
+   - model: `k2p5`（不是 `kimi-k2.5`）
+   - api: `anthropic-messages`
+3. 参考 [CONFIG_GUIDE.md](CONFIG_GUIDE.md) 的"常见问题排查"章节
+
+### AI 模型回复 403/401 错误
+
+**可能原因**：API Key 无效或过期
+
+**解决方案**：
+1. 验证 API Key：
+   ```bash
+   curl -H "Authorization: Bearer your-api-key" \
+        https://api.kimi.com/coding/v1/models
+   ```
+2. 检查 `~/.openclaw/agents/{agentId}/agent/auth-profiles.json` 中的 API key
+3. 重新创建 Agent 或更新配置文件
+
+### 飞书无法接收消息
+
+**排查步骤**：
+1. 检查飞书开放平台的事件订阅配置
+2. 确认连接方式为"长连接（WebSocket）"
+3. 确认已订阅 `im.message.receive_v1` 事件
+4. 检查 Agent 日志中的飞书连接状态
+
 ## 目录结构说明
 
 ```
@@ -138,7 +192,9 @@ cat /tmp/agent-config-ui/backend.log
 │   ├── dist/             # 构建输出
 │   └── node_modules/     # 依赖
 ├── shared/               # 共享类型
-└── DEPLOY.md             # ClawDeck 部署指南
+├── CONFIG_GUIDE.md       # 配置指南（AI模型/飞书等）
+├── DEPLOY.md             # ClawDeck 部署指南
+└── README.md             # 项目介绍
 ```
 
 ## 系统要求

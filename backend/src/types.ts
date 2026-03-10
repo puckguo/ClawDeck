@@ -85,6 +85,9 @@ export interface FeishuChannel {
   verificationToken: string;
   domain: string;
   connectionMode: string;
+  webhookPort?: number;
+  webhookPath?: string;
+  webhookHost?: string;
   dmPolicy: string;
   groupPolicy: string;
   requireMention: boolean;
@@ -200,6 +203,12 @@ export interface CreateAgentRequest {
     enabled: boolean;
     appId: string;
     appSecret: string;
+    encryptKey?: string;
+    verificationToken?: string;
+    connectionMode?: 'websocket' | 'webhook';
+    webhookPort?: number;
+    webhookPath?: string;
+    webhookHost?: string;
   };
   openClawChat?: {
     enabled: boolean;

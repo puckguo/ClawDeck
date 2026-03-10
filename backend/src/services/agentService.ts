@@ -377,6 +377,9 @@ export class AgentService {
     const aiApiKey = request.ai?.apiKey;
     const aiBaseUrl = request.ai?.baseUrl;
 
+    // 将 kimi 映射为 kimi-coding (OpenClaw 标准名称)
+    const normalizedProvider = aiProvider === 'kimi' ? 'kimi-coding' : aiProvider;
+
     // 生成配置
     const config: OpenClawConfig = {
       meta: {
@@ -385,15 +388,15 @@ export class AgentService {
       },
       auth: {
         profiles: {
-          [`${aiProvider}:default`]: {
-            provider: aiProvider,
+          [`${normalizedProvider}:default`]: {
+            provider: normalizedProvider,
             mode: 'api_key'
           }
         }
       },
       models: {
         mode: 'merge',
-        providers: this.buildModelProvider(aiProvider, aiModel, aiBaseUrl)
+        providers: this.buildModelProvider(normalizedProvider, aiModel, aiBaseUrl)
       },
       agents: {
         defaults: {
@@ -406,7 +409,7 @@ export class AgentService {
           id: agentId,
           name: request.name,
           workspace: workspaceDir,
-          agentDir: path.join(agentDir, 'agents', 'main')
+          agentDir: path.join(agentDir, 'agent')
         }]
       },
       session: {
@@ -417,10 +420,13 @@ export class AgentService {
           enabled: request.feishu?.enabled || false,
           appId: request.feishu?.appId || '',
           appSecret: request.feishu?.appSecret || '',
-          encryptKey: '',
-          verificationToken: '',
+          encryptKey: request.feishu?.encryptKey || '',
+          verificationToken: request.feishu?.verificationToken || '',
           domain: 'feishu',
-          connectionMode: 'websocket',
+          connectionMode: request.feishu?.connectionMode || 'websocket',
+          webhookPort: request.feishu?.webhookPort,
+          webhookPath: request.feishu?.webhookPath || '/feishu/events',
+          webhookHost: request.feishu?.webhookHost || '0.0.0.0',
           dmPolicy: 'open',
           groupPolicy: 'allowlist',
           requireMention: false,
@@ -462,18 +468,15 @@ export class AgentService {
     const envContent = this.generateEnvFile(config, agentId, request);
     await fs.writeFile(path.join(agentDir, '.env'), envContent);
 
-    // 创建 agent 目录结构 (agents/main/agent/) 和 auth-profiles.json
-    const agentMainDir = path.join(agentDir, 'agents', 'main');
-    const agentSubDir = path.join(agentMainDir, 'agent');
-    await fs.ensureDir(agentSubDir);
-
+    // 创建 auth-profiles.json 在 agent 子目录下
+    const agentSubDir = path.join(agentDir, 'agent');
     if (aiApiKey) {
       const authProfiles: Record<string, any> = {
         version: 1,
         profiles: {
-          [`${aiProvider}:default`]: {
+          [`${normalizedProvider}:default`]: {
             type: 'api_key',
-            provider: aiProvider,
+            provider: normalizedProvider,
             key: aiApiKey
           }
         }
@@ -517,9 +520,12 @@ export class AgentService {
     const provider = request?.ai?.provider || 'deepseek';
     const apiKey = request?.ai?.apiKey;
 
+    // 将 kimi 映射为 kimi-coding
+    const normalizedProvider = provider === 'kimi' ? 'kimi-coding' : provider;
+
     // 如果用户提供了 API key，优先使用
     if (apiKey) {
-      const envVarName = this.getApiKeyEnvVarName(provider);
+      const envVarName = this.getApiKeyEnvVarName(normalizedProvider);
       envVars.push(`${envVarName}=${apiKey}`);
     } else {
       // 从系统环境变量收集 API key
@@ -536,7 +542,7 @@ export class AgentService {
 
     // 添加 baseUrl（如果用户提供了）
     if (request?.ai?.baseUrl) {
-      const baseUrlVarName = this.getBaseUrlEnvVarName(provider);
+      const baseUrlVarName = this.getBaseUrlEnvVarName(normalizedProvider);
       envVars.push(`${baseUrlVarName}=${request.ai.baseUrl}`);
     }
 
@@ -963,9 +969,22 @@ start /B openclaw gateway --port ${port} > "${logFile}" 2>&1
         baseUrl: baseUrl || 'https://api.kimi.com/coding/',
         api: 'anthropic-messages',
         models: [{
-          id: model,
+          id: model === 'kimi-k2.5' ? 'k2p5' : model,
           name: 'Kimi for Coding',
-          reasoning: false,
+          reasoning: true,
+          input: ['text', 'image'],
+          cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+          contextWindow: 262144,
+          maxTokens: 32768
+        }]
+      },
+      kimi: {
+        baseUrl: baseUrl || 'https://api.kimi.com/coding/',
+        api: 'anthropic-messages',
+        models: [{
+          id: model === 'kimi-k2.5' ? 'k2p5' : model,
+          name: 'Kimi for Coding',
+          reasoning: true,
           input: ['text', 'image'],
           cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
           contextWindow: 262144,

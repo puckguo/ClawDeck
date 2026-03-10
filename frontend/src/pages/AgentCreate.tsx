@@ -163,9 +163,22 @@ export default function AgentCreate() {
             </Form.Item>
 
             <Alert
+              message="配置帮助"
+              description={
+                <div>
+                  <p>💡 <strong>Kimi 用户注意：</strong> 请使用 kimi-coding 作为 Provider，模型填写 k2p5</p>
+                  <p>📖 详细配置说明请参考项目根目录的 CONFIG_GUIDE.md</p>
+                </div>
+              }
+              type="info"
+              showIcon
+              style={{ marginBottom: '16px' }}
+            />
+
+            <Alert
               message="API Key 安全提示"
               description="API Key 将保存在 Agent 目录的 .env 文件中，请妥善保管"
-              type="info"
+              type="warning"
               showIcon
             />
           </Card>
@@ -195,8 +208,15 @@ export default function AgentCreate() {
             </Form.Item>
 
             <Alert
-              message="如何获取飞书凭证？"
-              description="在飞书开放平台创建应用，获取 AppID 和 AppSecret"
+              message="飞书配置指南"
+              description={
+                <div>
+                  <p>1. 在飞书开放平台创建应用，获取 AppID 和 AppSecret</p>
+                  <p>2. <strong>重要：</strong> 事件订阅方式选择"长连接（WebSocket）"</p>
+                  <p>3. 订阅事件：im.message.receive_v1</p>
+                  <p>4. 详细步骤请参考 CONFIG_GUIDE.md</p>
+                </div>
+              }
               type="info"
               showIcon
             />
