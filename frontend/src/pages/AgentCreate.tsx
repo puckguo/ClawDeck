@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from 'react-query'
+import { useTranslation } from 'react-i18next'
 import {
   Card, Steps, Form, Input, Button, message,
   Space, Typography, Radio, Alert, Descriptions, Tag, Checkbox
@@ -27,6 +28,7 @@ const aiProviders = [
 
 export default function AgentCreate() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
   const [form] = Form.useForm()
   const [formData, setFormData] = useState<any>({})
@@ -57,8 +59,8 @@ export default function AgentCreate() {
       }
     },
     onError: () => {
-      // 使用默认配置
-      message.warning('无法读取默认 AI 配置，使用内置默认值')
+      // Use default config
+      message.warning(t('agentCreate.messages.defaultAIError'))
     }
   })
 
@@ -66,7 +68,7 @@ export default function AgentCreate() {
     (values: any) => agentsApi.create(values),
     {
       onSuccess: (data) => {
-        message.success(`Agent ${data.data?.name} 创建成功`)
+        message.success(t('agentCreate.messages.createSuccess', { name: data.data?.name }))
         navigate('/agents')
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -75,7 +77,7 @@ export default function AgentCreate() {
 
   const steps = [
     {
-      title: '基础信息',
+      title: t('agentCreate.steps.basic'),
       icon: <UserOutlined />,
       content: (
         <Form
@@ -85,23 +87,23 @@ export default function AgentCreate() {
         >
           <Form.Item
             name="name"
-            label="助手名称"
-            rules={[{ required: true, message: '请输入助手名称' }]}
-            tooltip="用于内部标识，建议使用英文"
+            label={t('agentCreate.labels.agentName')}
+            rules={[{ required: true, message: t('agentCreate.labels.enterName') }]}
+            tooltip={t('agentCreate.labels.nameHint')}
           >
-            <Input placeholder="例如：客服助手、销售专家" />
+            <Input placeholder={t('agentCreate.labels.nameHint')} />
           </Form.Item>
 
           <Form.Item
             name="displayName"
-            label="显示名称"
-            rules={[{ required: true, message: '请输入显示名称' }]}
-            tooltip="在聊天室中显示的名字"
+            label={t('agentCreate.labels.displayName')}
+            rules={[{ required: true, message: t('agentCreate.labels.enterDisplayName') }]}
+            tooltip={t('agentCreate.labels.nameInChat')}
           >
-            <Input placeholder="例如：小明、王经理" />
+            <Input placeholder={t('agentCreate.labels.nameInChat')} />
           </Form.Item>
 
-          <Form.Item name="emoji" label="选择形象" initialValue="🐕">
+          <Form.Item name="emoji" label={t('agentCreate.labels.selectAvatar')} initialValue="🐕">
             <Radio.Group optionType="button" buttonStyle="solid">
               {emojis.map(emoji => (
                 <Radio.Button key={emoji} value={emoji} style={{ fontSize: '20px' }}>
@@ -111,19 +113,19 @@ export default function AgentCreate() {
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item name="role" label="角色描述">
+          <Form.Item name="role" label={t('agentCreate.labels.roleDesc')}>
             <Input.TextArea
               rows={3}
-              placeholder="描述这个助手的职责和特点..."
+              placeholder={t('agentCreate.labels.descHint')}
             />
           </Form.Item>
 
-          <Card title="🤖 AI 模型配置" style={{ marginTop: '16px' }} loading={defaultAIQuery.isLoading}>
+          <Card title="🤖 AI Configuration" style={{ marginTop: '16px' }} loading={defaultAIQuery.isLoading}>
             <Alert
-              message="已自动读取 openclaw 项目配置"
+              message="Auto-loaded openclaw config"
               description={defaultAIQuery.data?.data ? (
-                <span>使用 <Tag color="blue">{defaultAIQuery.data.data.provider}</Tag> {defaultAIQuery.data.data.model}</span>
-              ) : '使用默认配置'}
+                <span>Using <Tag color="blue">{defaultAIQuery.data.data.provider}</Tag> {defaultAIQuery.data.data.model}</span>
+              ) : 'Using default config'}
               type="info"
               showIcon
               style={{ marginBottom: '16px' }}
@@ -142,32 +144,32 @@ export default function AgentCreate() {
 
             <Form.Item
               name={['ai', 'model']}
-              label="模型"
+              label="Model"
             >
-              <Input placeholder="例如：deepseek-chat, gpt-4, claude-3-opus" />
+              <Input placeholder="e.g.: deepseek-chat, gpt-4, claude-3-opus" />
             </Form.Item>
 
             <Form.Item
               name={['ai', 'apiKey']}
               label="API Key"
-              rules={[{ required: true, message: '请输入 API Key' }]}
+              rules={[{ required: true, message: 'Please enter API Key' }]}
             >
               <Input.Password placeholder="sk-xxxxxxxxxxxxxxxx" />
             </Form.Item>
 
             <Form.Item
               name={['ai', 'baseUrl']}
-              label="Base URL (可选)"
+              label="Base URL (Optional)"
             >
               <Input placeholder="https://api.deepseek.com/v1" />
             </Form.Item>
 
             <Alert
-              message="配置帮助"
+              message="Configuration Help"
               description={
                 <div>
-                  <p>💡 <strong>Kimi 用户注意：</strong> 请使用 kimi-coding 作为 Provider，模型填写 k2p5</p>
-                  <p>📖 详细配置说明请参考项目根目录的 CONFIG_GUIDE.md</p>
+                  <p>💡 <strong>Kimi Users:</strong> Use kimi-coding as Provider, model: k2p5</p>
+                  <p>📖 See CONFIG_GUIDE.md in project root for details</p>
                 </div>
               }
               type="info"
@@ -176,8 +178,8 @@ export default function AgentCreate() {
             />
 
             <Alert
-              message="API Key 安全提示"
-              description="API Key 将保存在 Agent 目录的 .env 文件中，请妥善保管"
+              message="API Key Security"
+              description="API Key will be saved in Agent directory .env file"
               type="warning"
               showIcon
             />
@@ -186,7 +188,7 @@ export default function AgentCreate() {
       )
     },
     {
-      title: '消息渠道',
+      title: t('agentCreate.steps.channels'),
       icon: <SettingOutlined />,
       content: (
         <Form
@@ -194,27 +196,27 @@ export default function AgentCreate() {
           layout="vertical"
           onValuesChange={(_, values) => setFormData({ ...formData, ...values })}
         >
-          <Card title="💬 飞书（Lark）" style={{ marginBottom: '16px' }}>
+          <Card title={`💬 ${t('agentCreate.labels.feishu')}`} style={{ marginBottom: '16px' }}>
             <Form.Item name={['feishu', 'enabled']} valuePropName="checked">
-              <Checkbox>启用飞书连接</Checkbox>
+              <Checkbox>{t('agentCreate.labels.enableFeishu')}</Checkbox>
             </Form.Item>
 
-            <Form.Item name={['feishu', 'appId']} label="应用ID">
-              <Input placeholder="cli_xxxxxxxxxxxxxxxx" />
+            <Form.Item name={['feishu', 'appId']} label={t('agentCreate.labels.appId')}>
+              <Input placeholder={t('agentCreate.labels.appIdPlaceholder')} />
             </Form.Item>
 
-            <Form.Item name={['feishu', 'appSecret']} label="应用密钥">
+            <Form.Item name={['feishu', 'appSecret']} label={t('agentCreate.labels.appSecret')}>
               <Input.Password />
             </Form.Item>
 
             <Alert
-              message="飞书配置指南"
+              message={t('agentCreate.labels.feishuGuide')}
               description={
                 <div>
-                  <p>1. 在飞书开放平台创建应用，获取 AppID 和 AppSecret</p>
-                  <p>2. <strong>重要：</strong> 事件订阅方式选择"长连接（WebSocket）"</p>
-                  <p>3. 订阅事件：im.message.receive_v1</p>
-                  <p>4. 详细步骤请参考 CONFIG_GUIDE.md</p>
+                  <p>1. {t('agentCreate.labels.feishuStep1')}</p>
+                  <p>2. <strong>{t('common.important')}:</strong> {t('agentCreate.labels.feishuStep2')}</p>
+                  <p>3. {t('agentCreate.labels.feishuStep3')}</p>
+                  <p>4. {t('agentCreate.labels.feishuStep4')}</p>
                 </div>
               }
               type="info"
@@ -224,12 +226,12 @@ export default function AgentCreate() {
 
           <Card title="💬 Open-ClawChat">
             <Form.Item name={['openClawChat', 'enabled']} valuePropName="checked" initialValue={true}>
-              <Checkbox>启用聊天室功能</Checkbox>
+              <Checkbox>{t('agentCreate.labels.enableChat')}</Checkbox>
             </Form.Item>
 
             <Form.Item
               name={['openClawChat', 'serverUrl']}
-              label="服务器地址"
+              label={t('agentCreate.labels.serverUrl')}
               initialValue="http://47.97.86.239:3002"
             >
               <Input />
@@ -239,38 +241,38 @@ export default function AgentCreate() {
       )
     },
     {
-      title: '配置技能',
+      title: t('agentCreate.steps.skills'),
       icon: <ToolOutlined />,
       content: (
         <div>
-          <Paragraph>选择要安装的技能：</Paragraph>
+          <Paragraph>{t('agentCreate.labels.selectSkills')}</Paragraph>
 
           <Card
             size="small"
-            title={<Space><CheckCircleOutlined /> <span>房间管理</span></Space>}
+            title={<Space><CheckCircleOutlined /> <span>{t('agentCreate.skills.roomManager')}</span></Space>}
             style={{ marginBottom: '8px' }}
           >
-            <Text type="secondary">创建/加入/退出聊天室，支持 Owner 身份创建问题和密码</Text>
+            <Text type="secondary">{t('agentCreate.skills.roomManagerDesc')}</Text>
           </Card>
 
           <Card
             size="small"
-            title={<Space><CheckCircleOutlined /> <span>智能命令</span></Space>}
+            title={<Space><CheckCircleOutlined /> <span>{t('agentCreate.skills.smartCommands')}</span></Space>}
             style={{ marginBottom: '8px' }}
           >
-            <Text type="secondary">自然语言解析和执行命令</Text>
+            <Text type="secondary">{t('agentCreate.skills.smartCommandsDesc')}</Text>
           </Card>
 
           <Card
             size="small"
-            title={<Space><CheckCircleOutlined /> <span>心跳检测</span></Space>}
+            title={<Space><CheckCircleOutlined /> <span>{t('agentCreate.skills.heartbeat')}</span></Space>}
           >
-            <Text type="secondary">自动管理在线时长，超时自动退出</Text>
+            <Text type="secondary">{t('agentCreate.skills.heartbeatDesc')}</Text>
           </Card>
 
           <Alert
             style={{ marginTop: '16px' }}
-            message="默认已安装核心技能，创建后可以在配置页面管理更多技能"
+            message={t('agentCreate.labels.coreSkillsNote')}
             type="info"
             showIcon
           />
@@ -278,31 +280,31 @@ export default function AgentCreate() {
       )
     },
     {
-      title: '确认启动',
+      title: t('agentCreate.steps.confirm'),
       icon: <RocketOutlined />,
       content: (
         <div>
-          <Title level={4}>📋 配置摘要</Title>
+          <Title level={4}>📋 {t('agentCreate.labels.summary')}</Title>
 
           <Descriptions bordered column={1}>
-            <Descriptions.Item label="助手名称">{formData.name}</Descriptions.Item>
-            <Descriptions.Item label="显示名称">{formData.displayName}</Descriptions.Item>
-            <Descriptions.Item label="形象">{formData.emoji}</Descriptions.Item>
+            <Descriptions.Item label={t('agentCreate.labels.agentName')}>{formData.name}</Descriptions.Item>
+            <Descriptions.Item label={t('agentCreate.labels.displayName')}>{formData.displayName}</Descriptions.Item>
+            <Descriptions.Item label={t('agentCreate.labels.selectAvatar')}>{formData.emoji}</Descriptions.Item>
             <Descriptions.Item label="AI Provider">
               {formData.ai?.provider ? <Tag color="blue">{formData.ai.provider}</Tag> : <Tag color="blue">deepseek</Tag>}
             </Descriptions.Item>
-            <Descriptions.Item label="模型">{formData.ai?.model || 'deepseek-chat'}</Descriptions.Item>
-            <Descriptions.Item label="飞书连接">
-              {formData.feishu?.enabled ? <Tag color="green">已启用</Tag> : <Tag>未启用</Tag>}
+            <Descriptions.Item label={t('agentCreate.labels.model')}>{formData.ai?.model || 'deepseek-chat'}</Descriptions.Item>
+            <Descriptions.Item label={t('agentCreate.labels.feishuStatus')}>
+              {formData.feishu?.enabled ? <Tag color="green">{t('common.enabled')}</Tag> : <Tag>{t('common.disabled')}</Tag>}
             </Descriptions.Item>
             <Descriptions.Item label="Open-ClawChat">
-              {formData.openClawChat?.enabled !== false ? <Tag color="green">已启用</Tag> : <Tag>未启用</Tag>}
+              {formData.openClawChat?.enabled !== false ? <Tag color="green">{t('common.enabled')}</Tag> : <Tag>{t('common.disabled')}</Tag>}
             </Descriptions.Item>
           </Descriptions>
 
           <Alert
             style={{ marginTop: '16px' }}
-            message="创建后将自动生成配置文件并分配服务端口"
+            message={t('agentCreate.labels.autoConfig')}
             type="warning"
             showIcon
           />
@@ -317,7 +319,7 @@ export default function AgentCreate() {
         await form.validateFields(['name', 'displayName'])
         setCurrentStep(currentStep + 1)
       } catch {
-        // 验证失败
+        // Validation failed
       }
     } else {
       setCurrentStep(currentStep + 1)
@@ -329,8 +331,8 @@ export default function AgentCreate() {
   }
 
   const submit = () => {
-    // 使用 formData 状态（包含了所有步骤通过 onValuesChange 累积的数据）
-    // 而不是 form.getFieldsValue()（只返回当前渲染的字段）
+    // Use formData state (accumulated via onValuesChange from all steps)
+    // instead of form.getFieldsValue() (only returns currently rendered fields)
     const values = {
       name: formData.name,
       displayName: formData.displayName,
@@ -345,7 +347,7 @@ export default function AgentCreate() {
       feishu: formData.feishu,
       openClawChat: formData.openClawChat,
       skills: formData.skills,
-      autoStart: true  // 创建后自动启动
+      autoStart: true  // Auto-start after creation
     }
     createMutation.mutate(values)
   }
@@ -354,11 +356,11 @@ export default function AgentCreate() {
     <div>
       <div style={{ marginBottom: '24px' }}>
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/agents')}>
-          返回
+          {t('common.back')}
         </Button>
       </div>
 
-      <Title level={2} style={{ marginBottom: '24px' }}>创建你的 AI 助手</Title>
+      <Title level={2} style={{ marginBottom: '24px' }}>{t('agentCreate.title')}</Title>
 
       <Steps current={currentStep} style={{ marginBottom: '32px' }}>
         {steps.map(step => (
@@ -372,12 +374,12 @@ export default function AgentCreate() {
 
       <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
         <Button disabled={currentStep === 0} onClick={prev}>
-          上一步
+          {t('common.prev')}
         </Button>
 
         {currentStep < steps.length - 1 ? (
           <Button type="primary" onClick={next}>
-            下一步
+            {t('common.next')}
           </Button>
         ) : (
           <Button
@@ -386,7 +388,7 @@ export default function AgentCreate() {
             onClick={submit}
             loading={createMutation.isLoading}
           >
-            创建并启动
+            {t('agentCreate.buttons.createAndStart')}
           </Button>
         )}
       </div>

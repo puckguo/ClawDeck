@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Modal, Button, Steps, Typography, Space, Tag } from 'antd'
 import {
   UserOutlined,
@@ -34,7 +35,7 @@ interface GuideTourProps {
   onFileSelect?: (fileName: string, source: 'agent' | 'workspace') => void
 }
 
-// 可点击的文件列表
+// Clickable file list
 const configFiles: FileItem[] = [
   { name: 'SOUL.md', displayName: '性格设定', description: '定义性格、语气、行为风格', source: 'workspace', color: 'purple' },
   { name: 'IDENTITY.md', displayName: '身份信息', description: '名称、身份、背景故事', source: 'workspace', color: 'cyan' },
@@ -44,6 +45,7 @@ const configFiles: FileItem[] = [
 ]
 
 export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourProps) {
+  const { t } = useTranslation()
   const [currentStep, setCurrentStep] = useState(0)
 
   const handleFileClick = (file: FileItem) => {
@@ -54,88 +56,85 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
 
   const getGuideSteps = (): GuideStep[] => [
     {
-      title: '欢迎使用 ClawDeck',
+      title: t('guideTour.welcome.title'),
       icon: <RocketOutlined />,
       content: (
         <div>
           <Paragraph>
-            这是一个用于管理 OpenClaw Agent 的 Web 界面。您可以在这里：
+            {t('guideTour.welcome.description')}
           </Paragraph>
           <ul>
-            <li>查看和管理所有 Agent 的状态</li>
-            <li>编辑 Agent 的核心配置文件（SOUL.md、IDENTITY.md 等）</li>
-            <li>配置渠道（飞书、Open-ClawChat）</li>
-            <li>查看运行日志</li>
-            <li>管理技能和工作空间</li>
+            {(t('guideTour.welcome.features', { returnObjects: true }) as string[]).map((feature, index) => (
+              <li key={index}>{feature}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            点击"下一步"开始了解各个功能模块。
+            {t('guideTour.welcome.hint')}
           </Paragraph>
         </div>
       )
     },
     {
-      title: '概览面板',
+      title: t('guideTour.steps.overview.title'),
       icon: <UserOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>概览面板</strong>显示 Agent 的核心信息：
+            <strong>{t('guideTour.steps.overview.title')}</strong>{t('guideTour.steps.overview.description')}
           </Paragraph>
           <ul>
-            <li><Tag color="blue">基本信息</Tag>：助手ID、名称、服务端口等</li>
-            <li><Tag color="green">运行状态</Tag>：实时显示 CPU/内存使用率、运行时长</li>
-            <li><Tag color="purple">渠道配置</Tag>：飞书、Open-ClawChat 启用状态</li>
-            <li><Tag color="orange">统计信息</Tag>：已安装技能数、当前房间数、配置文件数</li>
+            {(t('guideTour.steps.overview.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            状态每 5 秒自动刷新，确保您看到最新的运行数据。
+            {t('guideTour.steps.overview.hint')}
           </Paragraph>
         </div>
       )
     },
     {
-      title: '基础配置',
+      title: t('guideTour.steps.basic.title'),
       icon: <SettingOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>基础配置</strong>用于设置 Agent 的基本属性：
+            <strong>{t('guideTour.steps.basic.title')}</strong>{t('guideTour.steps.basic.description')}
           </Paragraph>
           <ul>
-            <li><strong>助手名称</strong>：内部使用的标识名称</li>
-            <li><strong>显示名称</strong>：在聊天室中对外展示的名字</li>
-            <li><strong>形象标识</strong>：选择emoji作为头像（🐕 🐱 🦊 等）</li>
+            {(t('guideTour.steps.basic.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            注意：助手ID创建后不可修改，这是 Agent 的唯一标识。
+            {t('guideTour.steps.basic.hint')}
           </Paragraph>
         </div>
       )
     },
     {
-      title: '渠道配置',
+      title: t('guideTour.steps.channels.title'),
       icon: <MessageOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>渠道配置</strong>管理 Agent 与外界的通信方式：
+            <strong>{t('guideTour.steps.channels.title')}</strong>{t('guideTour.steps.channels.description')}
           </Paragraph>
           <ul>
             <li>
-              <Tag color="blue">飞书</Tag>
+              <Tag color="blue">{t('channels.feishu')}</Tag>
               <ul>
-                <li>配置 AppID 和 AppSecret</li>
-                <li>启用/禁用飞书机器人</li>
-                <li>支持群聊和私聊</li>
+                {(t('guideTour.steps.channels.feishu.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             </li>
             <li>
               <Tag color="purple">Open-ClawChat</Tag>
               <ul>
-                <li>配置服务器地址</li>
-                <li>设置 Agent 显示名称</li>
-                <li>管理加入的聊天室</li>
+                {(t('guideTour.steps.channels.chat.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             </li>
           </ul>
@@ -143,12 +142,12 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
       )
     },
     {
-      title: '配置文件管理',
+      title: t('guideTour.steps.files.title'),
       icon: <FileMarkdownOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>配置文件</strong>是 Agent 的核心，点击下列文件可直接编辑：
+            <strong>{t('guideTour.steps.files.title')}</strong>{t('guideTour.steps.files.description')}
           </Paragraph>
           <div style={{
             display: 'grid',
@@ -200,72 +199,68 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
             ))}
           </div>
           <Paragraph type="secondary">
-            <strong>自动备份</strong>：每次修改文件时，系统会自动创建备份到 .backups/ 目录。
+            <strong>{t('guideTour.steps.files.backup')}</strong>
           </Paragraph>
         </div>
       )
     },
     {
-      title: '运行日志',
+      title: t('guideTour.steps.logs.title'),
       icon: <HistoryOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>运行日志</strong>帮助您监控 Agent 的运行状况：
+            <strong>{t('guideTour.steps.logs.title')}</strong>{t('guideTour.steps.logs.description')}
           </Paragraph>
           <ul>
-            <li><strong>日志级别</strong>：调试 / 信息 / 警告 / 错误</li>
-            <li><strong>日志类型</strong>：系统 / 聊天 / 错误 / 审计</li>
-            <li><strong>搜索过滤</strong>：快速定位感兴趣的日志</li>
-            <li><strong>自动刷新</strong>：实时查看最新日志</li>
-            <li><strong>导出功能</strong>：导出日志用于分析</li>
+            {(t('guideTour.steps.logs.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            日志以时间线形式展示，最新的日志在最上方。
+            {t('guideTour.steps.logs.hint')}
           </Paragraph>
         </div>
       )
     },
     {
-      title: '快速操作',
+      title: t('guideTour.steps.actions.title'),
       icon: <ToolOutlined />,
       content: (
         <div>
           <Paragraph>
-            <strong>常用操作按钮</strong>：
+            <strong>{t('guideTour.steps.actions.title')}</strong>{t('guideTour.steps.actions.description')}
           </Paragraph>
           <ul>
-            <li><Tag color="success">启动</Tag>：启动 Agent 服务</li>
-            <li><Tag color="error">停止</Tag>：停止 Agent 服务</li>
-            <li><Tag color="warning">重启</Tag>：重启 Agent 服务</li>
-            <li><Tag color="default">删除</Tag>：删除 Agent（会移动到回收站）</li>
+            {(t('guideTour.steps.actions.items', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            危险操作（删除）会有二次确认，避免误操作。
+            {t('guideTour.steps.actions.hint')}
           </Paragraph>
         </div>
       )
     },
     {
-      title: '开始使用',
+      title: t('guideTour.steps.finish.title'),
       icon: <QuestionCircleOutlined />,
       content: (
         <div>
-          <Title level={4}>🎉 恭喜！</Title>
+          <Title level={4}>🎉 {t('guideTour.steps.finish.congrats')}</Title>
           <Paragraph>
-            您已经了解了 ClawDeck 的核心功能。
+            {t('guideTour.steps.finish.description')}
           </Paragraph>
           <Paragraph>
-            <strong>接下来您可以：</strong>
+            <strong>{t('guideTour.steps.finish.nextStepsTitle')}</strong>
           </Paragraph>
           <ul>
-            <li>查看概览了解 Agent 当前状态</li>
-            <li>编辑 SOUL.md 定制 Agent 性格</li>
-            <li>配置渠道让 Agent 接入聊天平台</li>
-            <li>查看日志监控运行状况</li>
+            {(t('guideTour.steps.finish.nextSteps', { returnObjects: true }) as string[]).map((item: string, index: number) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
           <Paragraph type="secondary">
-            如需再次查看此向导，点击右上角的"使用向导"按钮。
+            {t('guideTour.steps.finish.hint')}
           </Paragraph>
         </div>
       )
@@ -334,7 +329,7 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
                 {step.title}
               </Title>
               <Text type="secondary">
-                步骤 {currentStep + 1} / {guideSteps.length}
+                {t('guideTour.buttons.step')} {currentStep + 1} / {guideSteps.length}
               </Text>
             </div>
           </Space>
@@ -361,13 +356,13 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
             disabled={currentStep === 0}
             size="large"
           >
-            上一步
+            {t('common.prev')}
           </Button>
 
           <Space>
             {currentStep < guideSteps.length - 1 ? (
               <Button onClick={handleClose} size="large">
-                跳过向导
+                {t('guideTour.buttons.skip')}
               </Button>
             ) : null}
             <Button
@@ -375,7 +370,7 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
               onClick={handleNext}
               size="large"
             >
-              {currentStep === guideSteps.length - 1 ? '完成' : '下一步'}
+              {currentStep === guideSteps.length - 1 ? t('guideTour.buttons.finish') : t('common.next')}
             </Button>
           </Space>
         </div>

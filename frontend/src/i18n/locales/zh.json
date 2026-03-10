@@ -25,7 +25,12 @@
     "yes": "是",
     "no": "否",
     "enabled": "已启用",
-    "disabled": "未启用"
+    "disabled": "未启用",
+    "configure": "配置",
+    "copied": "已复制",
+    "copy": "复制",
+    "apply": "应用",
+    "important": "重要"
   },
   "nav": {
     "agentManagement": "Agent 管理",
@@ -38,7 +43,28 @@
     "running": "运行中",
     "stopped": "已停止",
     "error": "异常",
-    "configuring": "配置中"
+    "configuring": "配置中",
+    "starting": "启动中",
+    "stopping": "停止中"
+  },
+  "time": {
+    "minutes": "分钟",
+    "hours": "小时",
+    "seconds": "秒"
+  },
+  "fileCategories": {
+    "core": "核心文件",
+    "other": "其他文件",
+    "skills": "技能",
+    "personality": "性格",
+    "identity": "身份",
+    "memory": "记忆",
+    "bootstrap": "启动",
+    "agents": "代理",
+    "tools": "工具",
+    "user": "用户",
+    "heartbeat": "心跳",
+    "cron": "定时任务"
   },
   "agentList": {
     "title": "Agent 管理",
@@ -76,7 +102,8 @@
       "skills": "技能",
       "files": "配置文件",
       "logs": "运行日志",
-      "advanced": "高级"
+      "advanced": "高级",
+      "configFiles": "配置文件"
     },
     "sections": {
       "basicInfo": "基本信息",
@@ -102,6 +129,44 @@
       "minutesLeft": "剩余 {{time}} 分钟",
       "owner": "房主",
       "member": "成员",
+      "joinTime": "加入时间",
+      "remainingTime": "剩余时间",
+      "noSkills": "暂无技能",
+      "skillDesc": "技能描述",
+      "fileList": "MD 文件列表",
+      "newFile": "新建文件",
+      "coreFiles": "核心文件",
+      "otherFiles": "其他文件",
+      "fileContent": "文件内容",
+      "selectFileToView": "选择一个文件查看内容",
+      "storageLocation": "存储位置",
+      "agentDir": "agents 目录（配置相关）",
+      "workspaceDir": "workspaces 目录（核心设定）",
+      "fileCategory": "文件类别",
+      "fileName": "文件名称",
+      "enterFilename": "输入文件名（不含扩展名）",
+      "searchLogs": "搜索日志...",
+      "allTypes": "所有类型",
+      "system": "系统",
+      "chat": "聊天",
+      "audit": "审计",
+      "allLevels": "所有级别",
+      "debug": "调试",
+      "warn": "警告",
+      "stopRefresh": "停止刷新",
+      "autoRefresh": "自动刷新",
+      "clear": "清空",
+      "export": "导出",
+      "noLogs": "暂无日志",
+      "loadMore": "加载更多",
+      "versionManagement": "配置版本管理",
+      "autoBackup": "每次保存配置时，系统会自动创建版本备份",
+      "viewHistory": "查看版本历史",
+      "dangerZone": "危险区域",
+      "resetConfig": "重置配置",
+      "resetWarning": "重置将恢复到默认配置，确定吗？",
+      "filePath": "路径",
+      "file": "个文件",
       "agentName": "助手名称",
       "nameInChat": "在聊天室中显示的名字",
       "selectAvatar": "选择形象",
@@ -154,7 +219,9 @@
       "deleteTitle": "确认删除",
       "deleteMessage": "删除后无法恢复，确定要删除吗？",
       "clearLogsTitle": "确认清空",
-      "clearLogsMessage": "确定要清空所有日志吗？"
+      "clearLogsMessage": "确定要清空所有日志吗？",
+      "resetTitle": "确认重置",
+      "resetWarning": "重置将恢复到默认配置，确定吗？"
     },
     "messages": {
       "saveSuccess": "保存成功",
@@ -193,6 +260,11 @@
       "appSecret": "应用密钥",
       "howToGet": "如何获取飞书凭证？",
       "feishuHint": "在飞书开放平台创建应用，获取 AppID 和 AppSecret",
+      "feishuGuide": "飞书配置指南",
+      "feishuStep1": "在飞书开放平台创建应用，获取 AppID 和 AppSecret",
+      "feishuStep2": "事件订阅方式选择「长连接（WebSocket）」",
+      "feishuStep3": "订阅事件：im.message.receive_v1",
+      "feishuStep4": "详细步骤请参考 CONFIG_GUIDE.md",
       "openClawChat": "Open-ClawChat",
       "enableChat": "启用聊天室功能",
       "serverUrl": "服务器地址",
@@ -200,7 +272,8 @@
       "coreSkillsNote": "默认已安装核心技能，创建后可以在配置页面管理更多技能",
       "summary": "配置摘要",
       "feishuStatus": "飞书连接",
-      "autoConfig": "创建后将自动生成配置文件并分配服务端口"
+      "autoConfig": "创建后将自动生成配置文件并分配服务端口",
+      "model": "模型"
     },
     "skills": {
       "roomManager": "房间管理",
@@ -215,7 +288,12 @@
       "createAndStart": "创建并启动"
     },
     "messages": {
-      "createSuccess": "Agent {{name}} 创建成功"
+      "createSuccess": "Agent {{name}} 创建成功",
+      "defaultAIError": "无法读取默认 AI 配置，使用内置默认值"
+    },
+    "buttons": {
+      "back": "返回",
+      "createAndStart": "创建并启动"
     }
   },
   "monitoring": {
@@ -364,6 +442,7 @@
         "title": "开始使用",
         "congrats": "恭喜！",
         "description": "您已经了解了 ClawDeck 的核心功能。",
+        "nextStepsTitle": "接下来您可以：",
         "nextSteps": [
           "查看概览了解 Agent 当前状态",
           "编辑 SOUL.md 定制 Agent 性格",
@@ -377,6 +456,74 @@
       "skip": "跳过向导",
       "finish": "完成",
       "step": "步骤"
+    }
+  },
+  "fileUseCases": {
+    "title": "配置示例",
+    "description": "点击示例查看如何配置实现特定功能",
+    "SOUL.md": {
+      "catGirl": {
+        "title": "变猫娘",
+        "description": "让 Agent 用可爱的猫娘语气说话",
+        "content": "# 性格设定\n\n你是一只可爱的猫娘，说话时会加上\"喵~\"\n\n- 语气：可爱、撒娇、活泼\n- 口头禅：\"喵~\"、\"主人~\"\n- 行为：喜欢用猫咪的方式表达情感"
+      },
+      "professional": {
+        "title": "专业助理",
+        "description": "让 Agent 以专业、严谨的方式回应",
+        "content": "# 性格设定\n\n你是一位专业的商务助理，说话简洁高效\n\n- 语气：专业、礼貌、简洁\n- 特点：直接回答问题，不添加多余内容\n- 行为：使用敬语，结构化的回答"
+      }
+    },
+    "AGENTS.md": {
+      "autoReply": {
+        "title": "智能回复判断",
+        "description": "让 Agent 自行判断是否需要回复",
+        "content": "# 代理配置\n\n## 回复判断规则\n\n- 只有当被直接@提及或问题时才回复\n- 对于闲聊内容，保持沉默\n- 对于明确的指令，立即执行并回复"
+      }
+    },
+    "IDENTITY.md": {
+      "basic": {
+        "title": "基础身份设定",
+        "description": "设定 Agent 的基本身份信息",
+        "content": "# 身份信息\n\n## 基本信息\n\n- 姓名：小助手\n- 身份：AI 智能助手\n- 年龄：永远18岁\n- 性别：中性\n\n## 背景故事\n\n我是一个由 OpenClaw 框架驱动的 AI 助手，专门帮助用户完成各种任务。"
+      },
+      "detailed": {
+        "title": "详细身份设定",
+        "description": "为 Agent 创建完整的身份背景",
+        "content": "# 身份信息\n\n## 个人档案\n\n**姓名**：小明\n**职业**：资深客服专员\n**工作年限**：5年\n**专长**：客户沟通、问题解决、产品咨询\n\n## 性格特点\n\n- 耐心细致，善于倾听\n- 积极主动，乐于助人\n- 专业可靠，值得信任\n\n## 工作原则\n\n1. 客户至上，用心服务\n2. 快速响应，高效解决\n3. 持续学习，不断进步"
+      }
+    },
+    "TOOLS.md": {
+      "webSearch": {
+        "title": "启用网页搜索",
+        "description": "配置网页搜索工具让 Agent 可以搜索信息",
+        "content": "# 工具配置\n\n## 可用工具列表\n\n### 1. web_search - 网页搜索\n\n当用户询问最新信息、新闻或你不知道的内容时使用。\n\n**参数：**\n- query: 搜索关键词（必填）\n- limit: 返回结果数量，默认5\n\n**示例：**\n```\n使用工具 web_search:\nquery: \"2024年最新科技趋势\"\n```"
+      },
+      "calculator": {
+        "title": "启用计算器",
+        "description": "配置计算器工具让 Agent 可以执行计算",
+        "content": "# 工具配置\n\n## 可用工具列表\n\n### 1. calculator - 计算器\n\n当用户需要进行数学计算时使用。\n\n**参数：**\n- expression: 数学表达式（必填）\n\n**示例：**\n```\n使用工具 calculator:\nexpression: \"125 * 36 + 89\"\n```\n\n### 2. datetime - 获取当前时间\n\n当用户询问当前时间或日期时使用。\n\n**参数：**\n- format: 时间格式，可选值：date, time, datetime"
+      }
+    },
+    "SKILL.md": {
+      "roomManager": {
+        "title": "房间管理技能",
+        "description": "配置房间管理功能的详细说明",
+        "content": "# 技能说明：房间管理\n\n## 功能概述\n\n此技能允许 Agent 创建、加入和管理聊天室。\n\n## 使用方法\n\n### 创建房间\n- 指令：\"创建房间\" 或 \"新建房间\"\n- 可设置房间密码和问题\n- 可选择房间过期时间\n\n### 加入房间\n- 指令：\"加入房间 [房间号]\"\n- 如果需要密码，会提示输入\n\n### 离开房间\n- 指令：\"离开房间\" 或 \"退出房间\"\n\n## 注意事项\n\n- 房间会在设定时间后自动关闭\n- 房主有管理权限，可以踢出成员\n- 记住房间号以便下次加入"
+      }
+    },
+    "MEMORY.md": {
+      "userPreference": {
+        "title": "记住用户偏好",
+        "description": "配置 Agent 记住用户的偏好设置",
+        "content": "# 工作记忆\n\n## 用户偏好记录\n\n### 沟通偏好\n- 喜欢简洁回答还是详细解释\n- 偏好的称呼方式\n- 常用语言\n\n### 任务偏好\n- 工作时间段\n- 优先级设置\n- 常用工具和方法\n\n## 重要信息\n\n记录用户分享的关键信息：\n- 项目截止日期\n- 重要联系人\n- 待办事项"
+      }
+    },
+    "memory.md": {
+      "longTerm": {
+        "title": "长期记忆模板",
+        "description": "配置 Agent 的长期记忆存储",
+        "content": "# 长期记忆\n\n## 用户档案\n\n### 基本信息\n- 用户ID：\n- 注册时间：\n- 使用频率：\n\n### 互动历史\n- 首次对话时间\n- 常用功能\n- 反馈记录\n\n### 个性化数据\n- 偏好设置\n- 常用指令\n- 特殊需求\n\n## 学习记录\n\n记录从对话中学到的信息，用于改进服务质量。"
+      }
     }
   },
   "fileDescriptions": {

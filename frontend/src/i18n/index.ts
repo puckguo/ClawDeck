@@ -26,6 +26,10 @@ i18n
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
     },
+    // Ensure we have fallback for missing keys
+    returnNull: false,
+    returnEmptyString: false,
+    fallbackNS: 'translation',
   });
 
 export default i18n;

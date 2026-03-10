@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from 'react-query'
+import { useTranslation } from 'react-i18next'
 import {
   Card, Tabs, Descriptions, Tag, Space, Button, message,
   Form, Input, Select, Switch, Popconfirm, Divider, Typography,
@@ -20,22 +21,28 @@ import { filesApi, type MdFile, getFileInfo } from '../api/files'
 import { logsApi, type AgentLog } from '../api/logs'
 import ReactMarkdown from 'react-markdown'
 import GuideTour from '../components/GuideTour'
+import FileUseCases from '../components/FileUseCases'
 
 const { Title, Text, Paragraph } = Typography
 const { TabPane } = Tabs
 const { TextArea } = Input
 
-const statusConfig = {
-  running: { color: 'success', text: '运行中' },
-  stopped: { color: 'error', text: '已停止' },
-  error: { color: 'warning', text: '异常' },
-  configuring: { color: 'processing', text: '配置中' }
-}
-
 const categoryColors: Record<string, string> = {
+  'core': 'blue',
+  'other': 'default',
+  // Legacy categories for compatibility
+  'skills': 'blue',
+  'personality': 'purple',
+  'identity': 'cyan',
+  'memory': 'gold',
+  'bootstrap': 'green',
+  'agents': 'orange',
+  'tools': 'magenta',
+  'user': 'lime',
+  'heartbeat': 'red',
+  // Chinese keys for compatibility
   '核心文件': 'blue',
   '其他文件': 'default',
-  // 保留旧分类兼容
   '技能': 'blue',
   '性格': 'purple',
   '身份': 'cyan',
@@ -52,6 +59,7 @@ export default function AgentDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('overview')
   const [form] = Form.useForm()
 
@@ -135,7 +143,7 @@ export default function AgentDetail() {
         setLogsPagination(response.pagination || { total: 0, offset, limit: 100, hasMore: false })
       }
     } catch (error) {
-      message.error('加载日志失败')
+      message.error(t('agentDetail.messages.loadFileError'))
     } finally {
       setLogsLoading(false)
     }
@@ -166,7 +174,7 @@ export default function AgentDetail() {
     (values: any) => agentsApi.update(id!, values),
     {
       onSuccess: () => {
-        message.success('保存成功')
+        message.success(t('agentDetail.messages.saveSuccess'))
         queryClient.invalidateQueries(['agent', id])
       },
       onError: (error: Error) => { message.error(error.message) }
@@ -175,28 +183,28 @@ export default function AgentDetail() {
 
   const startMutation = useMutation(() => agentsApi.start(id!), {
     onSuccess: () => {
-      message.success('启动成功')
+      message.success(t('agentList.messages.startSuccess'))
       queryClient.invalidateQueries(['agent', id])
     }
   })
 
   const stopMutation = useMutation(() => agentsApi.stop(id!), {
     onSuccess: () => {
-      message.success('停止成功')
+      message.success(t('agentList.messages.stopSuccess'))
       queryClient.invalidateQueries(['agent', id])
     }
   })
 
   const restartMutation = useMutation(() => agentsApi.restart(id!), {
     onSuccess: () => {
-      message.success('重启成功')
+      message.success(t('agentList.messages.restartSuccess'))
       queryClient.invalidateQueries(['agent', id])
     }
   })
 
   const deleteMutation = useMutation(() => agentsApi.delete(id!), {
     onSuccess: () => {
-      message.success('删除成功')
+      message.success(t('agentList.messages.deleteSuccess'))
       navigate('/agents')
     }
   })
@@ -205,13 +213,13 @@ export default function AgentDetail() {
     () => filesApi.updateContent(id!, selectedFile!.relativePath, editContent, selectedFile!.source, true),
     {
       onSuccess: (data) => {
-        message.success(`文件保存成功${data.data?.backupCreated ? '（已备份原文件）' : ''}`)
+        message.success(data.data?.backupCreated ? t('agentDetail.messages.saveFileSuccess') : t('agentDetail.messages.saveSuccess'))
         setFileContent(editContent)
         setIsEditingFile(false)
         refetchFiles()
       },
       onError: () => {
-        message.error('保存失败')
+        message.error(t('agentDetail.messages.saveFileError'))
       }
     }
   )
@@ -223,13 +231,13 @@ export default function AgentDetail() {
     },
     {
       onSuccess: () => {
-        message.success('文件创建成功')
+        message.success(t('agentDetail.messages.createFileSuccess'))
         setCreateFileModalVisible(false)
         setNewFileName('')
         refetchFiles()
       },
       onError: () => {
-        message.error('创建失败')
+        message.error(t('agentDetail.messages.createFileError'))
       }
     }
   )
@@ -239,12 +247,12 @@ export default function AgentDetail() {
       filesApi.delete(id!, filePath, source),
     {
       onSuccess: () => {
-        message.success('文件已删除')
+        message.success(t('agentDetail.messages.deleteFileSuccess'))
         setSelectedFile(null)
         refetchFiles()
       },
       onError: () => {
-        message.error('删除失败')
+        message.error(t('agentDetail.messages.deleteFileError'))
       }
     }
   )
@@ -258,7 +266,7 @@ export default function AgentDetail() {
         setEditContent(response.data.content)
       }
     } catch (error) {
-      message.error('读取文件失败')
+      message.error(t('agentDetail.messages.loadFileError'))
     }
   }
 
@@ -272,18 +280,28 @@ export default function AgentDetail() {
     }
   }
 
+  const getStatusConfig = (status: string) => {
+    const config: Record<string, { color: string; text: string }> = {
+      running: { color: 'success', text: t('status.running') },
+      stopped: { color: 'error', text: t('status.stopped') },
+      error: { color: 'warning', text: t('status.error') },
+      configuring: { color: 'processing', text: t('status.configuring') }
+    }
+    return config[status] || { color: 'default', text: status }
+  }
+
   if (isLoading) return <Card loading />
   if (!agent) return <div>Agent not found</div>
 
-  const status = statusConfig[agent.status]
+  const status = getStatusConfig(agent.status)
 
   return (
     <div>
-      {/* 头部 */}
+      {/* Header */}
       <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/agents')}>
-            返回
+            {t('common.back')}
           </Button>
           <span style={{ fontSize: '24px' }}>{agent.emoji}</span>
           <Title level={3} style={{ margin: 0 }}>
@@ -300,113 +318,113 @@ export default function AgentDetail() {
             icon={<QuestionCircleOutlined />}
             onClick={() => setGuideVisible(true)}
           >
-            使用向导
+            {t('nav.guide')}
           </Button>
           {agent.status === 'running' ? (
             <>
               <Button icon={<PauseCircleOutlined />} onClick={() => stopMutation.mutate()}>
-                停止
+                {t('common.stop')}
               </Button>
               <Button icon={<ReloadOutlined />} onClick={() => restartMutation.mutate()}>
-                重启
+                {t('common.restart')}
               </Button>
             </>
           ) : (
             <Button type="primary" icon={<PlayCircleOutlined />} onClick={() => startMutation.mutate()}>
-              启动
+              {t('common.start')}
             </Button>
           )}
           <Popconfirm
-            title="确认删除"
-            description="删除后无法恢复，确定要删除吗？"
+            title={t('agentDetail.confirmations.deleteTitle')}
+            description={t('agentDetail.confirmations.deleteMessage')}
             onConfirm={() => deleteMutation.mutate()}
-            okText="删除"
-            cancelText="取消"
+            okText={t('common.delete')}
+            cancelText={t('common.cancel')}
             okButtonProps={{ danger: true }}
           >
-            <Button danger icon={<DeleteOutlined />}>删除</Button>
+            <Button danger icon={<DeleteOutlined />}>{t('common.delete')}</Button>
           </Popconfirm>
         </Space>
       </div>
 
-      {/* 标签页 */}
+      {/* Tabs */}
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        {/* 概览标签 */}
-        <TabPane tab="概览" key="overview">
+        {/* Overview Tab */}
+        <TabPane tab={t('agentDetail.tabs.overview')} key="overview">
           <Row gutter={16}>
             <Col span={16}>
               <Card>
-                <Descriptions title="基本信息" bordered column={2}>
-                  <Descriptions.Item label="助手ID">{agent.id}</Descriptions.Item>
-                  <Descriptions.Item label="内部名称">{agent.name}</Descriptions.Item>
-                  <Descriptions.Item label="显示名称">{agent.displayName}</Descriptions.Item>
-                  <Descriptions.Item label="形象">{agent.emoji}</Descriptions.Item>
-                  <Descriptions.Item label="服务端口">{agent.port}</Descriptions.Item>
-                  <Descriptions.Item label="配置文件">{agent.configPath}</Descriptions.Item>
+                <Descriptions title={t('agentDetail.sections.basicInfo')} bordered column={2}>
+                  <Descriptions.Item label={t('agentDetail.labels.agentId')}>{agent.id}</Descriptions.Item>
+                  <Descriptions.Item label={t('agentDetail.labels.internalName')}>{agent.name}</Descriptions.Item>
+                  <Descriptions.Item label={t('agentDetail.labels.displayName')}>{agent.displayName}</Descriptions.Item>
+                  <Descriptions.Item label={t('agentDetail.labels.avatar')}>{agent.emoji}</Descriptions.Item>
+                  <Descriptions.Item label={t('agentDetail.labels.servicePort')}>{agent.port}</Descriptions.Item>
+                  <Descriptions.Item label={t('agentDetail.labels.configFile')}>{agent.configPath}</Descriptions.Item>
                 </Descriptions>
 
                 <Divider />
 
-                <Descriptions title="运行状态" bordered column={2}>
-                  <Descriptions.Item label="当前状态">
+                <Descriptions title={t('agentDetail.sections.runtimeStatus')} bordered column={2}>
+                  <Descriptions.Item label={t('agentDetail.labels.currentStatus')}>
                     <Tag color={status.color}>{status.text}</Tag>
                   </Descriptions.Item>
                   {agent.runtimeInfo?.cpu !== undefined && (
-                    <Descriptions.Item label="CPU使用率">
+                    <Descriptions.Item label={t('agentDetail.labels.cpuUsage')}>
                       <Progress percent={agent.runtimeInfo.cpu} size="small" />
                     </Descriptions.Item>
                   )}
                   {agent.runtimeInfo?.memory !== undefined && (
-                    <Descriptions.Item label="内存使用率">
+                    <Descriptions.Item label={t('agentDetail.labels.memoryUsage')}>
                       <Progress percent={agent.runtimeInfo.memory} size="small" status="active" />
                     </Descriptions.Item>
                   )}
                   {agent.runtimeInfo?.uptime !== undefined && (
-                    <Descriptions.Item label="运行时长">
-                      {Math.floor(agent.runtimeInfo.uptime / 60)} 分钟
+                    <Descriptions.Item label={t('agentDetail.labels.uptime')}>
+                      {Math.floor(agent.runtimeInfo.uptime / 60)} {t('time.minutes')}
                     </Descriptions.Item>
                   )}
                 </Descriptions>
 
                 <Divider />
 
-                <Descriptions title="渠道配置" bordered column={2}>
-                  <Descriptions.Item label="飞书">
-                    {agent.channels.feishu ? <Tag color="success">已启用</Tag> : <Tag>未启用</Tag>}
+                <Descriptions title={t('agentDetail.sections.channelConfig')} bordered column={2}>
+                  <Descriptions.Item label={t('channels.feishu')}>
+                    {agent.channels.feishu ? <Tag color="success">{t('common.enabled')}</Tag> : <Tag>{t('common.disabled')}</Tag>}
                   </Descriptions.Item>
                   <Descriptions.Item label="Open-ClawChat">
-                    {agent.channels.openClawChat ? <Tag color="success">已启用</Tag> : <Tag>未启用</Tag>}
+                    {agent.channels.openClawChat ? <Tag color="success">{t('common.enabled')}</Tag> : <Tag>{t('common.disabled')}</Tag>}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
             </Col>
             <Col span={8}>
-              <Card title="统计信息">
+              <Card title={t('agentDetail.sections.statistics')}>
                 <Row gutter={16}>
                   <Col span={12}>
-                    <Statistic title="已安装技能" value={agent.skills.length} />
+                    <Statistic title={t('agentDetail.labels.installedSkills')} value={agent.skills.length} />
                   </Col>
                   <Col span={12}>
-                    <Statistic title="当前房间数" value={agent.currentRooms.length} />
+                    <Statistic title={t('agentDetail.labels.roomCount')} value={agent.currentRooms.length} />
                   </Col>
                 </Row>
                 <Divider />
                 <Statistic
-                  title="配置文件"
+                  title={t('agentDetail.labels.configFile')}
                   value={files?.total || 0}
-                  suffix="个MD文件"
+                  suffix={t('agentDetail.labels.mdFiles')}
                 />
               </Card>
 
               {agent.currentRooms.length > 0 && (
-                <Card title="当前房间" style={{ marginTop: '16px' }}>
+                <Card title={t('agentDetail.sections.currentRooms')} style={{ marginTop: '16px' }}>
                   <List
                     size="small"
                     dataSource={agent.currentRooms}
                     renderItem={room => (
                       <List.Item>
                         <Tag color="purple">{room.roomId}</Tag>
-                        <span>剩余 {room.remainingTime} 分钟</span>
+                        <span>{t('agentDetail.labels.minutesLeft', { time: room.remainingTime })}</span>
                       </List.Item>
                     )}
                   />
@@ -416,8 +434,8 @@ export default function AgentDetail() {
           </Row>
         </TabPane>
 
-        {/* 基础配置标签 */}
-        <TabPane tab="基础配置" key="basic">
+        {/* Basic Config Tab */}
+        <TabPane tab={t('agentDetail.tabs.basic')} key="basic">
           <Card>
             <Form
               form={form}
@@ -429,21 +447,21 @@ export default function AgentDetail() {
               }}
               onFinish={(values) => updateMutation.mutate(values)}
             >
-              <Form.Item label="助手ID">
+              <Form.Item label={t('agentDetail.labels.agentId')}>
                 <Input value={agent.id} disabled />
-                <Text type="secondary">助手ID不可修改</Text>
+                <Text type="secondary">{t('agentDetail.labels.cannotModify')}</Text>
               </Form.Item>
 
-              <Form.Item name="name" label="助手名称" rules={[{ required: true }]}>
+              <Form.Item name="name" label={t('agentDetail.labels.agentName')} rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
 
-              <Form.Item name="displayName" label="显示名称" rules={[{ required: true }]}>
-                <Input placeholder="在聊天室中显示的名字" />
+              <Form.Item name="displayName" label={t('agentDetail.labels.displayName')} rules={[{ required: true }]}>
+                <Input placeholder={t('agentDetail.labels.nameInChat')} />
               </Form.Item>
 
-              <Form.Item name="emoji" label="形象标识">
-                <Select placeholder="选择形象">
+              <Form.Item name="emoji" label={t('agentDetail.labels.selectAvatar')}>
+                <Select placeholder={t('agentDetail.labels.selectAvatar')}>
                   {['🐕', '🐱', '🦊', '🐼', '🦁', '🐰', '🐯', '🐨'].map(e => (
                     <Select.Option key={e} value={e}>{e}</Select.Option>
                   ))}
@@ -452,19 +470,19 @@ export default function AgentDetail() {
 
               <Form.Item>
                 <Button type="primary" htmlType="submit" icon={<SaveOutlined />} loading={updateMutation.isLoading}>
-                  保存修改
+                  {t('agentDetail.labels.saveChanges')}
                 </Button>
               </Form.Item>
             </Form>
           </Card>
         </TabPane>
 
-        {/* 渠道配置标签 */}
-        <TabPane tab="渠道配置" key="channels">
-          <Card title="飞书配置">
+        {/* Channels Tab */}
+        <TabPane tab={t('agentDetail.tabs.channels')} key="channels">
+          <Card title={t('agentDetail.labels.feishuConfig')}>
             {config && (
               <Form layout="vertical">
-                <Form.Item label="启用飞书">
+                <Form.Item label={t('agentDetail.labels.enableFeishu')}>
                   <Switch defaultChecked={config.channels.feishu.enabled} />
                 </Form.Item>
                 <Form.Item label="AppID">
@@ -473,17 +491,17 @@ export default function AgentDetail() {
                 <Form.Item label="AppSecret">
                   <Input.Password defaultValue={config.channels.feishu.appSecret} />
                 </Form.Item>
-                <Button type="primary" icon={<SaveOutlined />}>保存配置</Button>
+                <Button type="primary" icon={<SaveOutlined />}>{t('agentDetail.labels.saveConfig')}</Button>
               </Form>
             )}
           </Card>
         </TabPane>
 
-        {/* 聊天室标签 */}
-        <TabPane tab="聊天室" key="rooms">
+        {/* Rooms Tab */}
+        <TabPane tab={t('agentDetail.tabs.rooms')} key="rooms">
           <Card>
             {agent.currentRooms.length === 0 ? (
-              <Empty description="未加入任何房间" />
+              <Empty description={t('agentDetail.labels.noRooms')} />
             ) : (
               <List
                 grid={{ gutter: 16, column: 3 }}
@@ -491,10 +509,10 @@ export default function AgentDetail() {
                 renderItem={room => (
                   <List.Item>
                     <Card title={room.roomId} size="small">
-                      <p>加入时间: {new Date(room.joinedAt).toLocaleString()}</p>
-                      <p>剩余时间: {room.remainingTime} 分钟</p>
+                      <p>{t('agentDetail.labels.joinTime')}: {new Date(room.joinedAt).toLocaleString()}</p>
+                      <p>{t('agentDetail.labels.remainingTime')}: {room.remainingTime} {t('time.minutes')}</p>
                       <Tag color={room.isOwner ? 'gold' : 'default'}>
-                        {room.isOwner ? '房主' : '成员'}
+                        {room.isOwner ? t('agentDetail.labels.owner') : t('agentDetail.labels.member')}
                       </Tag>
                     </Card>
                   </List.Item>
@@ -504,19 +522,19 @@ export default function AgentDetail() {
           </Card>
         </TabPane>
 
-        {/* 技能标签 */}
-        <TabPane tab="技能" key="skills">
+        {/* Skills Tab */}
+        <TabPane tab={t('agentDetail.tabs.skills')} key="skills">
           <Card>
             {agent.skills.length === 0 ? (
-              <Empty description="暂无技能" />
+              <Empty description={t('agentDetail.labels.noSkills')} />
             ) : (
               <List
                 dataSource={agent.skills}
                 renderItem={skill => (
-                  <List.Item actions={[<Button size="small">配置</Button>]}>
+                  <List.Item actions={[<Button size="small">{t('common.configure')}</Button>]}>
                     <List.Item.Meta
                       title={skill}
-                      description="技能描述"
+                      description={t('agentDetail.labels.skillDesc')}
                     />
                   </List.Item>
                 )}
@@ -525,14 +543,14 @@ export default function AgentDetail() {
           </Card>
         </TabPane>
 
-        {/* 文件管理标签 */}
-        <TabPane tab={<span><FileMarkdownOutlined />配置文件</span>} key="files">
+        {/* Files Tab */}
+        <TabPane tab={<span><FileMarkdownOutlined />{t('agentDetail.tabs.configFiles')}</span>} key="files">
           <Row gutter={16}>
             <Col span={8}>
               <Card
                 title={
                   <Space>
-                    <span>MD 文件列表</span>
+                    <span>{t('agentDetail.labels.fileList')}</span>
                     <Badge count={files?.total || 0} />
                   </Space>
                 }
@@ -543,16 +561,23 @@ export default function AgentDetail() {
                     icon={<PlusOutlined />}
                     onClick={() => setCreateFileModalVisible(true)}
                   >
-                    新建
+                    {t('agentDetail.labels.newFile')}
                   </Button>
                 }
               >
-                {files?.grouped && Object.entries(files.grouped).map(([category, categoryFiles]) => (
+                {files?.grouped && Object.entries(files.grouped)
+                  .sort(([a], [b]) => {
+                    // 核心文件排在最前面
+                    if (a === '核心文件' || a === 'Core Files') return -1;
+                    if (b === '核心文件' || b === 'Core Files') return 1;
+                    return a.localeCompare(b);
+                  })
+                  .map(([category, categoryFiles]) => (
                   <div key={category} style={{ marginBottom: '16px' }}>
                     <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-                      <Tag color={categoryColors[category] || 'default'}>{category}</Tag>
+                      <Tag color={categoryColors[category] || 'default'}>{t(`fileCategories.${category}`, { defaultValue: category })}</Tag>
                       <Text type="secondary" style={{ fontSize: '12px', marginLeft: 8 }}>
-                        {categoryFiles.length} 个文件
+                        {categoryFiles.length} {t('agentDetail.labels.file', { defaultValue: 'files' })}
                       </Text>
                     </Text>
                     <List
@@ -571,7 +596,7 @@ export default function AgentDetail() {
                             actions={[
                               <Popconfirm
                                 key="delete"
-                                title="确认删除"
+                                title={t('agentDetail.confirmations.deleteTitle')}
                                 onConfirm={(e) => {
                                   e?.stopPropagation()
                                   deleteFileMutation.mutate({ filePath: file.relativePath, source: file.source })
@@ -595,10 +620,10 @@ export default function AgentDetail() {
                                 {fileInfo.description}
                               </Text>
                               <Text type="secondary" style={{ fontSize: '11px', display: 'block', marginTop: 2 }}>
-                                文件: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+                                {t('agentDetail.labels.file')}: {file.name} ({(file.size / 1024).toFixed(1)} KB)
                               </Text>
                               <Text type="secondary" style={{ fontSize: '10px', display: 'block', marginTop: 2, color: '#999' }}>
-                                路径: {file.displayPath}
+                                {t('agentDetail.labels.filePath')}: {file.displayPath}
                               </Text>
                             </div>
                           </List.Item>
@@ -610,6 +635,15 @@ export default function AgentDetail() {
               </Card>
             </Col>
             <Col span={16}>
+              {selectedFile && (
+                <FileUseCases
+                  fileName={selectedFile.name}
+                  onApply={(content) => {
+                    setEditContent(content);
+                    setIsEditingFile(true);
+                  }}
+                />
+              )}
               <Card
                 title={
                   selectedFile ? (
@@ -638,11 +672,11 @@ export default function AgentDetail() {
                       </div>
                       <div style={{ marginTop: 2 }}>
                         <Text type="secondary" style={{ fontSize: '11px', color: '#999' }}>
-                          路径: {selectedFile.displayPath}
+                          {t('agentDetail.labels.filePath')}: {selectedFile.displayPath}
                         </Text>
                       </div>
                     </div>
-                  ) : '文件内容'
+                  ) : t('agentDetail.labels.fileContent')
                 }
                 extra={
                   selectedFile && (
@@ -657,7 +691,7 @@ export default function AgentDetail() {
                           setIsEditingFile(!isEditingFile)
                         }}
                       >
-                        {isEditingFile ? '取消' : '编辑'}
+                        {isEditingFile ? t('common.cancel') : t('common.edit')}
                       </Button>
                       {isEditingFile && (
                         <Button
@@ -666,7 +700,7 @@ export default function AgentDetail() {
                           loading={saveFileMutation.isLoading}
                           onClick={() => saveFileMutation.mutate()}
                         >
-                          保存
+                          {t('common.save')}
                         </Button>
                       )}
                     </Space>
@@ -687,15 +721,15 @@ export default function AgentDetail() {
                     </div>
                   )
                 ) : (
-                  <Empty description="选择一个文件查看内容" />
+                  <Empty description={t('agentDetail.labels.selectFileToView')} />
                 )}
               </Card>
             </Col>
           </Row>
 
-          {/* 创建文件模态框 */}
+          {/* Create File Modal */}
           <Modal
-            title="新建 MD 文件"
+            title={t('agentDetail.labels.newFile') + ' MD'}
             open={createFileModalVisible}
             onOk={() => createFileMutation.mutate()}
             onCancel={() => {
@@ -705,24 +739,24 @@ export default function AgentDetail() {
             confirmLoading={createFileMutation.isLoading}
           >
             <Form layout="vertical">
-              <Form.Item label="存储位置">
+              <Form.Item label={t('agentDetail.labels.storageLocation')}>
                 <Select value={newFileSource} onChange={setNewFileSource}>
-                  <Select.Option value="agent">agents 目录（配置相关）</Select.Option>
-                  <Select.Option value="workspace">workspaces 目录（核心设定）</Select.Option>
+                  <Select.Option value="agent">{t('agentDetail.labels.agentDir')}</Select.Option>
+                  <Select.Option value="workspace">{t('agentDetail.labels.workspaceDir')}</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item label="文件类别">
+              <Form.Item label={t('agentDetail.labels.fileCategory')}>
                 <Select value={newFileCategory} onChange={setNewFileCategory}>
-                  <Select.Option value="skills">技能</Select.Option>
-                  <Select.Option value="workspaces">工作空间</Select.Option>
-                  <Select.Option value="agent">代理配置</Select.Option>
+                  <Select.Option value="skills">{t('fileCategories.skills')}</Select.Option>
+                  <Select.Option value="workspaces">{t('fileCategories.memory')}</Select.Option>
+                  <Select.Option value="agent">{t('fileCategories.agents')}</Select.Option>
                 </Select>
               </Form.Item>
-              <Form.Item label="文件名称">
+              <Form.Item label={t('agentDetail.labels.fileName')}>
                 <Input
                   value={newFileName}
                   onChange={(e) => setNewFileName(e.target.value)}
-                  placeholder="输入文件名（不含扩展名）"
+                  placeholder={t('agentDetail.labels.enterFilename')}
                   addonAfter=".md"
                 />
               </Form.Item>
@@ -730,13 +764,13 @@ export default function AgentDetail() {
           </Modal>
         </TabPane>
 
-        {/* 日志标签 */}
-        <TabPane tab={<span><HistoryOutlined />运行日志</span>} key="logs">
+        {/* Logs Tab */}
+        <TabPane tab={<span><HistoryOutlined />{t('agentDetail.tabs.logs')}</span>} key="logs">
           <Card>
             <Row gutter={16} style={{ marginBottom: '16px' }}>
               <Col span={6}>
                 <Input
-                  placeholder="搜索日志..."
+                  placeholder={t('agentDetail.labels.searchLogs')}
                   value={logSearch}
                   onChange={(e) => setLogSearch(e.target.value)}
                   prefix={<SearchOutlined />}
@@ -745,47 +779,47 @@ export default function AgentDetail() {
               </Col>
               <Col span={4}>
                 <Select value={logType} onChange={setLogType} style={{ width: '100%' }}>
-                  <Select.Option value="all">所有类型</Select.Option>
-                  <Select.Option value="system">系统</Select.Option>
-                  <Select.Option value="chat">聊天</Select.Option>
-                  <Select.Option value="error">错误</Select.Option>
-                  <Select.Option value="audit">审计</Select.Option>
+                  <Select.Option value="all">{t('agentDetail.labels.allTypes')}</Select.Option>
+                  <Select.Option value="system">{t('agentDetail.labels.system')}</Select.Option>
+                  <Select.Option value="chat">{t('agentDetail.labels.chat')}</Select.Option>
+                  <Select.Option value="error">{t('common.error')}</Select.Option>
+                  <Select.Option value="audit">{t('agentDetail.labels.audit')}</Select.Option>
                 </Select>
               </Col>
               <Col span={4}>
                 <Select value={logLevel} onChange={setLogLevel} style={{ width: '100%' }}>
-                  <Select.Option value="all">所有级别</Select.Option>
-                  <Select.Option value="debug">调试</Select.Option>
-                  <Select.Option value="info">信息</Select.Option>
-                  <Select.Option value="warn">警告</Select.Option>
-                  <Select.Option value="error">错误</Select.Option>
+                  <Select.Option value="all">{t('agentDetail.labels.allLevels')}</Select.Option>
+                  <Select.Option value="debug">{t('agentDetail.labels.debug')}</Select.Option>
+                  <Select.Option value="info">{t('common.info')}</Select.Option>
+                  <Select.Option value="warn">{t('agentDetail.labels.warn')}</Select.Option>
+                  <Select.Option value="error">{t('common.error')}</Select.Option>
                 </Select>
               </Col>
               <Col span={10}>
                 <Space>
                   <Button icon={<SearchOutlined />} onClick={() => loadLogs(0, false)}>
-                    搜索
+                    {t('common.search')}
                   </Button>
                   <Button
                     type={autoRefresh ? 'primary' : 'default'}
                     onClick={() => setAutoRefresh(!autoRefresh)}
                   >
-                    {autoRefresh ? '停止刷新' : '自动刷新'}
+                    {autoRefresh ? t('agentDetail.labels.stopRefresh') : t('agentDetail.labels.autoRefresh')}
                   </Button>
                   <Popconfirm
-                    title="确认清空"
-                    description="确定要清空所有日志吗？"
+                    title={t('agentDetail.confirmations.clearLogsTitle')}
+                    description={t('agentDetail.confirmations.clearLogsMessage')}
                     onConfirm={() => {
                       logsApi.clearLogs(id!).then(() => {
-                        message.success('日志已清空')
+                        message.success(t('agentDetail.messages.clearLogsSuccess'))
                         loadLogs(0, false)
                       })
                     }}
                   >
-                    <Button icon={<ClearOutlined />}>清空</Button>
+                    <Button icon={<ClearOutlined />}>{t('agentDetail.labels.clear')}</Button>
                   </Popconfirm>
                   <Button icon={<DownloadOutlined />} onClick={() => logsApi.exportLogs(id!)}>
-                    导出
+                    {t('agentDetail.labels.export')}
                   </Button>
                 </Space>
               </Col>
@@ -793,9 +827,9 @@ export default function AgentDetail() {
 
             <div style={{ maxHeight: '600px', overflow: 'auto' }}>
               {logsLoading && logs.length === 0 ? (
-                <Spin tip="加载中..." />
+                <Spin tip={t('common.loading')} />
               ) : logs.length === 0 ? (
-                <Empty description="暂无日志" />
+                <Empty description={t('agentDetail.labels.noLogs')} />
               ) : (
                 <Timeline mode="left">
                   {logs.map((log, index) => (
@@ -823,7 +857,7 @@ export default function AgentDetail() {
               {logsPagination.hasMore && (
                 <div style={{ textAlign: 'center', marginTop: '16px' }}>
                   <Button onClick={() => loadLogs(logsPagination.offset + logsPagination.limit, true)}>
-                    加载更多
+                    {t('agentDetail.labels.loadMore')}
                   </Button>
                 </div>
               )}
@@ -831,32 +865,32 @@ export default function AgentDetail() {
           </Card>
         </TabPane>
 
-        {/* 高级标签 */}
-        <TabPane tab="高级" key="advanced">
-          <Card title="配置版本管理">
+        {/* Advanced Tab */}
+        <TabPane tab={t('agentDetail.tabs.advanced')} key="advanced">
+          <Card title={t('agentDetail.labels.versionManagement')}>
             <Alert
-              message="每次保存配置时，系统会自动创建版本备份"
+              message={t('agentDetail.labels.autoBackup')}
               type="info"
               showIcon
               style={{ marginBottom: '16px' }}
             />
-            <Button icon={<HistoryOutlined />}>查看版本历史</Button>
+            <Button icon={<HistoryOutlined />}>{t('agentDetail.labels.viewHistory')}</Button>
           </Card>
 
-          <Card title="危险区域" style={{ marginTop: '16px' }}>
+          <Card title={t('agentDetail.labels.dangerZone')} style={{ marginTop: '16px' }}>
             <Popconfirm
-              title="确认重置"
-              description="重置将恢复到默认配置，确定吗？"
-              okText="重置"
-              cancelText="取消"
+              title={t('agentDetail.confirmations.resetTitle')}
+              description={t('agentDetail.confirmations.resetWarning')}
+              okText={t('common.confirm')}
+              cancelText={t('common.cancel')}
             >
-              <Button danger>重置配置</Button>
+              <Button danger>{t('agentDetail.labels.resetConfig')}</Button>
             </Popconfirm>
           </Card>
         </TabPane>
       </Tabs>
 
-      {/* 使用向导 */}
+      {/* Guide Tour */}
       <GuideTour
         visible={guideVisible}
         onClose={() => setGuideVisible(false)}

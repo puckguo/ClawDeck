@@ -1,6 +1,7 @@
 {
   "common": {
     "appName": "ClawDeck",
+    "important": "Important",
     "loading": "Loading...",
     "save": "Save",
     "cancel": "Cancel",
@@ -25,7 +26,11 @@
     "yes": "Yes",
     "no": "No",
     "enabled": "Enabled",
-    "disabled": "Disabled"
+    "disabled": "Disabled",
+    "configure": "Configure",
+    "copied": "Copied",
+    "copy": "Copy",
+    "apply": "Apply"
   },
   "nav": {
     "agentManagement": "Agent Management",
@@ -38,7 +43,28 @@
     "running": "Running",
     "stopped": "Stopped",
     "error": "Error",
-    "configuring": "Configuring"
+    "configuring": "Configuring",
+    "starting": "Starting",
+    "stopping": "Stopping"
+  },
+  "time": {
+    "minutes": "minutes",
+    "hours": "hours",
+    "seconds": "seconds"
+  },
+  "fileCategories": {
+    "core": "Core Files",
+    "other": "Other Files",
+    "skills": "Skills",
+    "personality": "Personality",
+    "identity": "Identity",
+    "memory": "Memory",
+    "bootstrap": "Bootstrap",
+    "agents": "Agents",
+    "tools": "Tools",
+    "user": "User",
+    "heartbeat": "Heartbeat",
+    "cron": "Scheduled Tasks"
   },
   "agentList": {
     "title": "Agent Management",
@@ -76,7 +102,8 @@
       "skills": "Skills",
       "files": "Config Files",
       "logs": "Logs",
-      "advanced": "Advanced"
+      "advanced": "Advanced",
+      "configFiles": "Config Files"
     },
     "sections": {
       "basicInfo": "Basic Information",
@@ -102,6 +129,44 @@
       "minutesLeft": "{{time}} minutes left",
       "owner": "Owner",
       "member": "Member",
+      "joinTime": "Join Time",
+      "remainingTime": "Remaining Time",
+      "noSkills": "No skills installed",
+      "skillDesc": "Skill Description",
+      "fileList": "MD File List",
+      "newFile": "New File",
+      "coreFiles": "Core Files",
+      "otherFiles": "Other Files",
+      "fileContent": "File Content",
+      "selectFileToView": "Select a file to view content",
+      "storageLocation": "Storage Location",
+      "agentDir": "agents directory (config related)",
+      "workspaceDir": "workspaces directory (core settings)",
+      "fileCategory": "File Category",
+      "fileName": "File Name",
+      "enterFilename": "Enter filename (without extension)",
+      "searchLogs": "Search logs...",
+      "allTypes": "All Types",
+      "system": "System",
+      "chat": "Chat",
+      "audit": "Audit",
+      "allLevels": "All Levels",
+      "debug": "Debug",
+      "warn": "Warning",
+      "stopRefresh": "Stop Refresh",
+      "autoRefresh": "Auto Refresh",
+      "clear": "Clear",
+      "export": "Export",
+      "noLogs": "No logs",
+      "loadMore": "Load More",
+      "versionManagement": "Version Management",
+      "autoBackup": "System automatically creates version backup on each save",
+      "viewHistory": "View Version History",
+      "dangerZone": "Danger Zone",
+      "resetConfig": "Reset Configuration",
+      "resetWarning": "Reset will restore default configuration, are you sure?",
+      "filePath": "Path",
+      "file": "files",
       "agentName": "Assistant Name",
       "nameInChat": "Name displayed in chat rooms",
       "selectAvatar": "Select Avatar",
@@ -154,7 +219,9 @@
       "deleteTitle": "Confirm Delete",
       "deleteMessage": "Cannot recover after deletion, are you sure?",
       "clearLogsTitle": "Confirm Clear",
-      "clearLogsMessage": "Are you sure you want to clear all logs?"
+      "clearLogsMessage": "Are you sure you want to clear all logs?",
+      "resetTitle": "Confirm Reset",
+      "resetWarning": "Reset will restore default configuration, are you sure?"
     },
     "messages": {
       "saveSuccess": "Saved successfully",
@@ -193,6 +260,11 @@
       "appSecret": "App Secret",
       "howToGet": "How to get Feishu credentials?",
       "feishuHint": "Create app on Feishu Open Platform to get AppID and AppSecret",
+      "feishuGuide": "Feishu Configuration Guide",
+      "feishuStep1": "Create app on Feishu Open Platform to get AppID and AppSecret",
+      "feishuStep2": "Event subscription: choose WebSocket (long connection)",
+      "feishuStep3": "Subscribe to event: im.message.receive_v1",
+      "feishuStep4": "See CONFIG_GUIDE.md for detailed steps",
       "openClawChat": "Open-ClawChat",
       "enableChat": "Enable Chat Room Feature",
       "serverUrl": "Server URL",
@@ -200,7 +272,8 @@
       "coreSkillsNote": "Core skills installed by default, more can be managed after creation",
       "summary": "Configuration Summary",
       "feishuStatus": "Feishu Connection",
-      "autoConfig": "Config files will be auto-generated and service port assigned after creation"
+      "autoConfig": "Config files will be auto-generated and service port assigned after creation",
+      "model": "Model"
     },
     "skills": {
       "roomManager": "Room Management",
@@ -215,7 +288,12 @@
       "createAndStart": "Create & Start"
     },
     "messages": {
-      "createSuccess": "Agent {{name}} created successfully"
+      "createSuccess": "Agent {{name}} created successfully",
+      "defaultAIError": "Cannot read default AI config, using built-in defaults"
+    },
+    "buttons": {
+      "back": "Back",
+      "createAndStart": "Create & Start"
     }
   },
   "monitoring": {
@@ -364,6 +442,7 @@
         "title": "Get Started",
         "congrats": "Congratulations!",
         "description": "You have learned ClawDeck's core features.",
+        "nextStepsTitle": "Next steps:",
         "nextSteps": [
           "View overview to understand Agent current status",
           "Edit SOUL.md to customize Agent personality",
@@ -377,6 +456,74 @@
       "skip": "Skip Guide",
       "finish": "Finish",
       "step": "Step"
+    }
+  },
+  "fileUseCases": {
+    "title": "Configuration Examples",
+    "description": "Click an example to see how to configure specific features",
+    "SOUL.md": {
+      "catGirl": {
+        "title": "Cat Girl Persona",
+        "description": "Make the Agent speak in a cute cat girl tone",
+        "content": "# Personality Setting\n\nYou are a cute cat girl who adds \"Meow~\" when speaking\n\n- Tone: Cute, coquettish, lively\n- Catchphrases: \"Meow~\", \"Master~\"\n- Behavior: Express emotions in cat-like ways"
+      },
+      "professional": {
+        "title": "Professional Assistant",
+        "description": "Make the Agent respond in a professional, rigorous manner",
+        "content": "# Personality Setting\n\nYou are a professional business assistant who speaks concisely and efficiently\n\n- Tone: Professional, polite, concise\n- Traits: Answer questions directly without extra content\n- Behavior: Use honorifics, provide structured responses"
+      }
+    },
+    "AGENTS.md": {
+      "autoReply": {
+        "title": "Smart Reply Judgment",
+        "description": "Let the Agent decide whether to reply on its own",
+        "content": "# Agent Configuration\n\n## Reply Judgment Rules\n\n- Only reply when directly @mentioned or asked a question\n- Stay silent during casual chat\n- Execute clear commands immediately and reply"
+      }
+    },
+    "IDENTITY.md": {
+      "basic": {
+        "title": "Basic Identity Setup",
+        "description": "Set up the basic identity information for the Agent",
+        "content": "# Identity Information\n\n## Basic Info\n\n- Name: Assistant\n- Identity: AI Smart Assistant\n- Age: Forever 18\n- Gender: Neutral\n\n## Background Story\n\nI am an AI assistant powered by the OpenClaw framework, dedicated to helping users complete various tasks."
+      },
+      "detailed": {
+        "title": "Detailed Identity Setup",
+        "description": "Create a complete identity background for the Agent",
+        "content": "# Identity Information\n\n## Personal Profile\n\n**Name**: Xiaoming\n**Occupation**: Senior Customer Service Specialist\n**Experience**: 5 years\n**Expertise**: Customer communication, problem solving, product consulting\n\n## Personality Traits\n\n- Patient and detail-oriented, good at listening\n- Proactive and helpful\n- Professional and trustworthy\n\n## Work Principles\n\n1. Customer first, dedicated service\n2. Quick response, efficient resolution\n3. Continuous learning and improvement"
+      }
+    },
+    "TOOLS.md": {
+      "webSearch": {
+        "title": "Enable Web Search",
+        "description": "Configure web search tool to let Agent search for information",
+        "content": "# Tool Configuration\n\n## Available Tools\n\n### 1. web_search - Web Search\n\nUse when users ask for latest information, news, or things you don't know.\n\n**Parameters:**\n- query: Search keywords (required)\n- limit: Number of results to return, default 5\n\n**Example:**\n```\nUse tool web_search:\nquery: \"Latest tech trends 2024\"\n```"
+      },
+      "calculator": {
+        "title": "Enable Calculator",
+        "description": "Configure calculator tool to let Agent perform calculations",
+        "content": "# Tool Configuration\n\n## Available Tools\n\n### 1. calculator - Calculator\n\nUse when users need mathematical calculations.\n\n**Parameters:**\n- expression: Mathematical expression (required)\n\n**Example:**\n```\nUse tool calculator:\nexpression: \"125 * 36 + 89\"\n```\n\n### 2. datetime - Get Current Time\n\nUse when users ask for current time or date.\n\n**Parameters:**\n- format: Time format, options: date, time, datetime"
+      }
+    },
+    "SKILL.md": {
+      "roomManager": {
+        "title": "Room Management Skill",
+        "description": "Configure detailed instructions for room management functionality",
+        "content": "# Skill Description: Room Management\n\n## Function Overview\n\nThis skill allows the Agent to create, join, and manage chat rooms.\n\n## How to Use\n\n### Create Room\n- Command: \"Create room\" or \"New room\"\n- Can set room password and question\n- Can choose room expiration time\n\n### Join Room\n- Command: \"Join room [room number]\"\n- Will prompt for password if required\n\n### Leave Room\n- Command: \"Leave room\" or \"Exit room\"\n\n## Notes\n\n- Rooms automatically close after set time\n- Room owner has management privileges and can kick members\n- Remember the room number for next time"
+      }
+    },
+    "MEMORY.md": {
+      "userPreference": {
+        "title": "Remember User Preferences",
+        "description": "Configure Agent to remember user preference settings",
+        "content": "# Working Memory\n\n## User Preference Records\n\n### Communication Preferences\n- Preferred answer style: concise or detailed\n- Preferred form of address\n- Preferred language\n\n### Task Preferences\n- Working hours\n- Priority settings\n- Common tools and methods\n\n## Important Information\n\nRecord key information shared by users:\n- Project deadlines\n- Important contacts\n- To-do items"
+      }
+    },
+    "memory.md": {
+      "longTerm": {
+        "title": "Long-term Memory Template",
+        "description": "Configure Agent's long-term memory storage",
+        "content": "# Long-term Memory\n\n## User Profile\n\n### Basic Information\n- User ID:\n- Registration date:\n- Usage frequency:\n\n### Interaction History\n- First conversation time\n- Commonly used features\n- Feedback records\n\n### Personalized Data\n- Preference settings\n- Common commands\n- Special requirements\n\n## Learning Records\n\nRecord information learned from conversations to improve service quality."
+      }
     }
   },
   "fileDescriptions": {
