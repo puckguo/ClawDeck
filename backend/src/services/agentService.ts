@@ -305,9 +305,13 @@ export class AgentService {
     try {
       const stats = await pidusage(pid);
 
+      // pidusage 返回的 memory 是字节数，需要转换为百分比
+      const totalMem = os.totalmem();
+      const memoryPercent = (stats.memory / totalMem) * 100;
+
       return {
         cpu: parseFloat(stats.cpu.toFixed(1)),
-        memory: parseFloat(stats.memory.toFixed(1)),
+        memory: parseFloat(memoryPercent.toFixed(1)),
         uptime: Math.floor(stats.elapsed / 1000) // 转换为秒
       };
     } catch {
