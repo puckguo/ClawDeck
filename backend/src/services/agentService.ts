@@ -262,7 +262,8 @@ export class AgentService {
           }
         }
       } else {
-        const { stdout } = await execAsync(`pgrep -f "openclaw.*${name}" 2>/dev/null | head -1 || true`);
+        // macOS/Linux: 使用 ps + grep 替代 pgrep（macOS 默认没有 pgrep）
+        const { stdout } = await execAsync(`ps aux | grep -i "openclaw.*${name}" | grep -v grep | awk '{print $2}' | head -1`);
         const pid = parseInt(stdout.trim());
         return isNaN(pid) ? null : pid;
       }
