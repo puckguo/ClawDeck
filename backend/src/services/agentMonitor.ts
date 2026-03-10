@@ -6,14 +6,12 @@
 import { EventEmitter } from 'events';
 import cron from 'node-cron';
 import { AgentService } from './agentService';
-import type { MonitoringMetrics, AgentStatus } from '../types';
+import type { AgentStatus } from '../types';
 
 export class AgentMonitor extends EventEmitter {
   private static instance: AgentMonitor;
   private agentService: AgentService;
   private monitorTask?: cron.ScheduledTask;
-  private metricsHistory: Map<string, MonitoringMetrics[]> = new Map();
-  private readonly maxHistorySize = 100;
 
   private constructor() {
     super();
@@ -74,48 +72,10 @@ export class AgentMonitor extends EventEmitter {
           });
         }
 
-        // 收集指标
-        if (refreshedAgent.status === 'running' && refreshedAgent.runtimeInfo) {
-          const metrics: MonitoringMetrics = {
-            agentId: agent.id,
-            timestamp: new Date().toISOString(),
-            cpu: refreshedAgent.runtimeInfo.cpu || 0,
-            memory: refreshedAgent.runtimeInfo.memory || 0
-          };
-
-          this.addMetrics(agent.id, metrics);
-        }
       }
     } catch (error) {
       console.error('[Monitor] Failed to check agents:', error);
     }
-  }
-
-  /**
-   * 添加指标到历史
-   */
-  private addMetrics(agentId: string, metrics: MonitoringMetrics): void {
-    if (!this.metricsHistory.has(agentId)) {
-      this.metricsHistory.set(agentId, []);
-    }
-
-    const history = this.metricsHistory.get(agentId)!;
-    history.push(metrics);
-
-    // 限制历史大小
-    if (history.length > this.maxHistorySize) {
-      history.shift();
-    }
-  }
-
-  /**
-   * 获取指标历史
-   */
-  getMetricsHistory(agentId: string, duration: number = 3600): MonitoringMetrics[] {
-    const history = this.metricsHistory.get(agentId) || [];
-    const cutoff = Date.now() - duration * 1000;
-
-    return history.filter(m => new Date(m.timestamp).getTime() > cutoff);
   }
 
   /**

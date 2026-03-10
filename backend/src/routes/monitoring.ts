@@ -28,27 +28,6 @@ router.get('/status', async (req, res, next) => {
 });
 
 /**
- * GET /api/monitoring/:agentId/metrics
- * 获取 Agent 监控指标
- */
-router.get('/:agentId/metrics', async (req, res, next) => {
-  try {
-    const { agentId } = req.params;
-    const { duration = '3600' } = req.query;
-
-    const metrics = monitor.getMetricsHistory(agentId, parseInt(duration as string, 10));
-
-    res.json({
-      success: true,
-      data: metrics,
-      count: metrics.length
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-/**
  * GET /api/monitoring/:agentId/realtime
  * 获取 Agent 实时状态
  */
@@ -65,18 +44,12 @@ router.get('/:agentId/realtime', async (req, res, next) => {
       });
     }
 
-    // 获取最新指标
-    const recentMetrics = monitor.getMetricsHistory(agentId, 300); // 最近5分钟
-    const latestMetric = recentMetrics[recentMetrics.length - 1];
-
     res.json({
       success: true,
       data: {
         agentId,
         status: agent.status,
         runtime: agent.runtimeInfo,
-        currentMetric: latestMetric || null,
-        recentMetrics,
         channels: agent.channels,
         rooms: agent.currentRooms,
         timestamp: new Date().toISOString()
@@ -100,12 +73,6 @@ router.get('/overview', async (req, res, next) => {
     const totalAgents = agents.length;
     const runningAgents = agents.filter(a => a.status === 'running');
 
-    // 资源使用统计
-    const totalMemory = runningAgents.reduce((sum, a) => sum + (a.runtimeInfo?.memory || 0), 0);
-    const avgCpu = runningAgents.length > 0
-      ? runningAgents.reduce((sum, a) => sum + (a.runtimeInfo?.cpu || 0), 0) / runningAgents.length
-      : 0;
-
     // 渠道统计
     const feishuConnected = agents.filter(a => a.channels.feishu).length;
     const openClawChatConnected = agents.filter(a => a.channels.openClawChat).length;
@@ -123,8 +90,6 @@ router.get('/overview', async (req, res, next) => {
           error: summary.error
         },
         resources: {
-          totalMemory: Math.round(totalMemory * 100) / 100,
-          avgCpu: Math.round(avgCpu * 100) / 100,
           totalRooms
         },
         channels: {

@@ -143,8 +143,6 @@ export type AgentStatus = 'running' | 'stopped' | 'error' | 'configuring';
 
 export interface AgentRuntimeInfo {
   pid?: number;
-  cpu?: number;
-  memory?: number;
   uptime?: number;
   lastMessageAt?: string;
   lastError?: string;
@@ -272,8 +270,6 @@ export interface ConfigVersion {
 export interface MonitoringMetrics {
   agentId: string;
   timestamp: string;
-  cpu: number;
-  memory: number;
   memoryLimit?: number;
   eventLoopLag?: number;
   activeConnections?: number;
