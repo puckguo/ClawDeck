@@ -24,6 +24,29 @@
 - 📋 **多维表格** - 飞书表格同步
 - 🔌 **扩展 API** - RESTful API
 
+## 界面预览
+
+### Agent 列表
+![Agent列表](docs/images/agent1.png)
+
+### 创建 Agent
+![创建Agent](docs/images/create-agent.png)
+
+### 概览面板
+![概览面板](docs/images/概览1.png)
+
+### 配置管理
+![配置管理](docs/images/config.png)
+
+### 飞书集成
+![飞书集成](docs/images/配飞书1.png)
+
+### 身份设定
+![身份设定](docs/images/身份1.png)
+
+### Markdown 编辑
+![Markdown编辑](docs/images/md1.png)
+
 ## 技术栈
 
 - **前端**: React 18 + TypeScript + Ant Design + Vite
