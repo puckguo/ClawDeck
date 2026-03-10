@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal, Button, Steps, Typography, Space, Tag } from 'antd'
+import { Modal, Button, Steps, Typography, Space, Tag, Tooltip } from 'antd'
 import {
   UserOutlined,
   SettingOutlined,
@@ -295,22 +295,40 @@ export default function GuideTour({ visible, onClose, onFileSelect }: GuideTourP
       title={null}
       open={visible}
       onCancel={handleClose}
-      width={700}
+      width={900}
       footer={null}
       closable={true}
       maskClosable={true}
+      style={{ maxWidth: '95vw' }}
     >
       <div style={{ padding: '20px 0' }}>
         <Steps
           current={currentStep}
           onChange={setCurrentStep}
           items={guideSteps.map(s => ({
-            title: s.title,
+            title: (
+              <Tooltip title={s.title}>
+                <span style={{
+                  display: 'inline-block',
+                  maxWidth: '80px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {s.title}
+                </span>
+              </Tooltip>
+            ),
             icon: s.icon
           }))}
           size="small"
           direction="horizontal"
-          style={{ marginBottom: '30px', overflowX: 'auto' }}
+          style={{
+            marginBottom: '30px',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            paddingBottom: '10px'
+          }}
         />
 
         <div style={{ minHeight: '300px', padding: '0 10px' }}>
