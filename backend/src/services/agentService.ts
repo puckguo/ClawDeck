@@ -11,6 +11,7 @@ import { glob } from 'glob';
 import { v4 as uuidv4 } from 'uuid';
 import net from 'net';
 import os from 'os';
+import pidusage from 'pidusage';
 import type {
   OpenClawConfig,
   AgentViewModel,
@@ -298,57 +299,20 @@ export class AgentService {
 
   /**
    * 获取进程信息（跨平台）
+   * 使用 pidusage 库获取准确的 CPU 和内存使用率
    */
   private async getProcessInfo(pid: number): Promise<{ cpu: number; memory: number; uptime: number }> {
     try {
-      if (isWindows) {
-        // Windows 上使用 PowerShell 获取进程信息
-        const { stdout } = await execAsync(
-          `powershell -Command "Get-Process -Id ${pid} | Select-Object CPU, WorkingSet, StartTime | ConvertTo-Json"`
-        );
-        const data = JSON.parse(stdout);
-        const workingSetMB = (data.WorkingSet || 0) / (1024 * 1024);
-        const totalMemMB = require('os').totalmem() / (1024 * 1024);
-        const memoryPercent = (workingSetMB / totalMemMB) * 100;
+      const stats = await pidusage(pid);
 
-        return {
-          cpu: data.CPU || 0,
-          memory: parseFloat(memoryPercent.toFixed(1)),
-          uptime: data.StartTime ? Math.floor((Date.now() - new Date(data.StartTime).getTime()) / 1000) : 0
-        };
-      } else {
-        const { stdout } = await execAsync(`ps -p ${pid} -o pid,pcpu,pmem,etime 2>/dev/null | tail -1 || true`);
-        const parts = stdout.trim().split(/\s+/);
-
-        return {
-          cpu: parseFloat(parts[1]) || 0,
-          memory: parseFloat(parts[2]) || 0,
-          uptime: this.parseUptime(parts[3] || '')
-        };
-      }
+      return {
+        cpu: parseFloat(stats.cpu.toFixed(1)),
+        memory: parseFloat(stats.memory.toFixed(1)),
+        uptime: Math.floor(stats.elapsed / 1000) // 转换为秒
+      };
     } catch {
       return { cpu: 0, memory: 0, uptime: 0 };
     }
-  }
-
-  /**
-   * 解析运行时间
-   */
-  private parseUptime(etime: string): number {
-    // 解析 ps 输出的 etime 格式
-    let seconds = 0;
-    const parts = etime.split(/[-:]/);
-    if (parts.length === 4) {
-      // 天-时:分:秒
-      seconds = parseInt(parts[0]) * 86400 + parseInt(parts[1]) * 3600 + parseInt(parts[2]) * 60 + parseInt(parts[3]);
-    } else if (parts.length === 3) {
-      // 时:分:秒
-      seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
-    } else if (parts.length === 2) {
-      // 分:秒
-      seconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-    }
-    return seconds;
   }
 
   /**
