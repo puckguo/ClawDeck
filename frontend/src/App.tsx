@@ -28,7 +28,7 @@ function App() {
       <AntdApp>
         <Layout style={{ minHeight: '100vh' }}>
           <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
-            <h1 style={{ margin: 0, fontSize: '20px' }}>🐾 OpenClaw Pet - 数字宠物养成</h1>
+            <h1 style={{ margin: 0, fontSize: '20px' }}>🐾 OpenclawPet - 数字宠物养成</h1>
             <Space>
               {/* <Link to="/bountyclaw">
                 <Button type="primary" icon={<ShoppingOutlined />} style={{ marginRight: 16 }}>

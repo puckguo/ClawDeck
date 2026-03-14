@@ -1,7 +1,7 @@
 {
-  "name": "agent-config-ui",
+  "name": "openclaw-pet",
   "version": "1.0.0",
-  "description": "Agent 配置管理系统 - 人性化配置 OpenClaw Agent",
+  "description": "OpenclawPet - 基于 OpenClaw Agent 的数字宠物养成系统",
   "private": true,
   "scripts": {
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
@@ -17,9 +17,12 @@
   },
   "keywords": [
     "openclaw",
+    "openclawpet",
+    "digital-pet",
+    "ai-pet",
+    "virtual-pet",
     "agent",
-    "config",
-    "management"
+    "chatbot"
   ],
   "author": "",
   "license": "MIT"

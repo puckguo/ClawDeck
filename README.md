@@ -1,4 +1,4 @@
-# ClawDeck - OpenClaw Pet 数字宠物养成系统
+# OpenClaw Pet - 数字宠物养成系统
 
 [![中文](https://img.shields.io/badge/语言-中文-blue)](README.md)
 [![English](https://img.shields.io/badge/Language-English-blue)](README_EN.md)
@@ -60,7 +60,7 @@ const ALIYUN_API_KEY = 'your-api-key-here';
 ## 🏗️ 项目结构
 
 ```
-ClawDeck/
+openclaw-pet/
 ├── backend/                 # 后端服务
 │   ├── src/
 │   │   ├── services/       # 业务逻辑
