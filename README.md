@@ -1,205 +1,202 @@
-# ClawDeck - OpenClaw Agent 配置管理系统
+# ClawDeck - OpenClaw Pet 数字宠物养成系统
 
 [![中文](https://img.shields.io/badge/语言-中文-blue)](README.md)
 [![English](https://img.shields.io/badge/Language-English-blue)](README_EN.md)
 
-人性化管理 OpenClaw Agent 的 Web 界面，支持查看和修改已有 Agent 配置、创建向导、批量操作、实时监控、中英双语等功能。
+基于 OpenClaw Agent 的数字宠物养成系统。每个 Agent 都是一个有生命的 AI 伙伴，拥有独立的性格、情绪和成长轨迹。通过自然对话与宠物互动，看着它从婴儿成长为独特的个体。
 
-## 功能特性
+## ✨ 核心特性
 
-### 核心功能
-- ✅ **Agent 列表管理** - 卡片式/列表式展示，状态实时监控
-- ✅ **已有 Agent 编辑** - 7个标签页完整配置管理（概览/基础/渠道/聊天室/技能/日志/高级）
-- ✅ **创建向导** - 4步流程，表单验证，一键启动
-- ✅ **批量操作** - 批量启动/停止/重启
-- ✅ **配置版本管理** - 自动备份，历史记录，一键回滚
+### 🤖 AI 驱动的生命体
+- **真实个性** - Agent 基于 SOUL.md 和 IDENTITY.md 形成独特性格
+- **自然对话** - 像和真实宠物一样聊天，AI 实时生成反应和情绪
+- **自主状态** - 饥饿、心情、精力等状态由 AI 自主管理并输出
+- **成长进化** - 通过互动积累经验，解锁新的性格特征和能力
 
-### 监控功能
-- 📊 **实时监控面板** - CPU/内存/状态
-- 📈 **资源使用统计** - 趋势图表
-- 🔔 **状态变更通知** - 自动刷新
+### 🎮 互动方式
+- **自然语言** - 无需点击按钮，直接打字和宠物聊天
+- **语音对话** - 集成阿里云 TTS，宠物可以开口说话
+- **形象生成** - 集成阿里云文生图，根据状态生成宠物形象
+- **主动消息** - 宠物会主动找你聊天，分享心情和想法
 
-### 集成功能
-- 💬 **IM 对话配置** - 飞书机器人命令
-- 📋 **多维表格** - 飞书表格同步
-- 🔌 **扩展 API** - RESTful API
+### 📊 可视化界面
+- **宠物首页** - 展示当前状态和最新形象
+- **聊天界面** - 实时对话，查看历史消息
+- **相册系统** - 保存和查看宠物形象进化历程
+- **状态面板** - 实时监控宠物状态变化
 
-## 界面预览
+## 🚀 快速开始
 
-### Agent 列表
-![Agent列表](docs/images/agent1.png)
+### 环境要求
+- Node.js 18+
+- SQLite（内置，无需额外安装）
+- 阿里云 DashScope API Key（用于 TTS 和文生图）
 
-### 创建 Agent
-![创建Agent](docs/images/create-agent.png)
-
-### 概览面板
-![概览面板](docs/images/概览1.png)
-
-### 配置管理
-![配置管理](docs/images/config.png)
-
-### 飞书集成
-![飞书集成](docs/images/配飞书1.png)
-
-### 身份设定
-![身份设定](docs/images/身份1.png)
-
-### Markdown 编辑
-![Markdown编辑](docs/images/md1.png)
-
-## 技术栈
-
-- **前端**: React 18 + TypeScript + Ant Design + Vite
-- **后端**: Node.js + Express + TypeScript
-- **共享**: TypeScript 类型定义
-
-## 快速开始
-
-### 配置指南
-
-在开始之前，请先阅读 **[配置指南](CONFIG_GUIDE.md)** 了解如何正确配置：
-- AI 模型（Kimi、DeepSeek 等）
-- 飞书集成
-- 常见问题排查
-
-### AI 自动部署（推荐）
-
-让 OpenClaw 或 Claude Code 读取部署指南并自动执行：
-
-```
-请读取 {PROJECT_ROOT}/DEPLOY.md 并按步骤部署 ClawDeck
-```
-
-AI 将自动完成：环境检查 → 安装依赖 → 构建项目 → 启动服务 → 验证部署
-
-### 手动部署
-
-如果无法使用 AI 部署，可手动执行：
+### 启动服务
 
 ```bash
-cd {PROJECT_ROOT}
-./start.sh
-```
+# 启动后端（端口 3001）
+cd backend
+npm install
+npm run build
+npm start
 
-脚本会自动完成：安装依赖 → 构建项目 → 启动服务 → 运行测试
-
-访问 http://localhost:18888 查看 ClawDeck
-
-### 脚本命令
-
-```bash
-./start.sh all      # 完整流程（默认）
-./start.sh install  # 仅安装依赖
-./start.sh build    # 仅构建项目
-./start.sh test     # 仅运行测试
-./start.sh start    # 仅启动服务
-```
-
-### 手动操作
-
-#### 1. 安装依赖
-
-```bash
-cd ~/.openclaw/agent-config-ui
-npm run install:all
-```
-
-#### 2. 开发模式
-
-```bash
+# 启动前端（端口 5174）
+cd frontend
+npm install
 npm run dev
 ```
 
-- 前端: http://localhost:3000
-- 后端 API: http://localhost:18888
+访问 http://localhost:5174 开始你的数字宠物之旅。
 
-#### 3. 生产构建
+### 配置阿里云 API（可选）
 
-```bash
-npm run build
-npm start
+在 `backend/src/services/ttsService.ts` 和 `a2uiService.ts` 中配置你的阿里云 API Key：
+
+```typescript
+const ALIYUN_API_KEY = 'your-api-key-here';
 ```
 
-## 项目结构
+## 🏗️ 项目结构
 
 ```
-agent-config-ui/
-├── shared/               # 共享类型定义
-│   └── types.ts         # TypeScript 类型
-├── backend/             # 后端服务
+ClawDeck/
+├── backend/                 # 后端服务
 │   ├── src/
-│   │   ├── routes/      # API 路由
-│   │   ├── services/    # 业务逻辑
-│   │   ├── middleware/  # 中间件
-│   │   └── index.ts     # 入口
+│   │   ├── services/       # 业务逻辑
+│   │   │   ├── petAIService.ts      # AI 对话服务
+│   │   │   ├── petService.ts        # 宠物状态管理
+│   │   │   ├── ttsService.ts        # 阿里云 TTS
+│   │   │   ├── a2uiService.ts       # 阿里云文生图
+│   │   │   └── petMessageService.ts # 主动消息推送
+│   │   ├── routes/         # API 路由
+│   │   └── jobs/           # 定时任务
 │   └── package.json
-├── frontend/            # 前端应用
+├── frontend/               # 前端应用
 │   ├── src/
-│   │   ├── components/  # 组件
-│   │   ├── pages/       # 页面
-│   │   ├── api/         # API 调用
-│   │   └── App.tsx      # 主应用
-│   └── package.json
-├── agent/               # 配置管理 Agent（IM 对话）
-├── CONFIG_GUIDE.md      # 配置指南（AI模型/飞书等）
-├── DEPLOY.md            # AI 部署指南
+│   │   ├── pages/          # 页面
+│   │   │   ├── PetHome.tsx     # 宠物首页
+│   │   │   ├── PetA2UIPage.tsx # 宠物详情页
+│   │   │   └── PetDetail.tsx   # 宠物详情
+│   │   └── api/            # API 调用
+├── shared/                 # 共享类型
+│   └── types.ts
 └── README.md
 ```
 
-## API 接口
+## 🎮 使用指南
 
-### Agent 管理
-- `GET /api/agents` - 获取所有 Agent
-- `POST /api/agents` - 创建 Agent
-- `GET /api/agents/:id` - 获取单个 Agent
-- `PATCH /api/agents/:id` - 更新 Agent
-- `DELETE /api/agents/:id` - 删除 Agent
-- `POST /api/agents/:id/start` - 启动 Agent
-- `POST /api/agents/:id/stop` - 停止 Agent
-- `POST /api/agents/:id/restart` - 重启 Agent
-- `POST /api/agents/batch` - 批量操作
+### 创建宠物
+1. 进入 Agent 管理页面
+2. 创建新的 Agent（即宠物）
+3. 配置宠物的性格和能力（SOUL.md / IDENTITY.md）
+4. 宠物会自动创建并开始生长
 
-### 配置管理
-- `GET /api/config/:agentId` - 获取配置
-- `PUT /api/config/:agentId` - 更新配置
-- `POST /api/config/:agentId/validate` - 验证配置
+### 与宠物互动
+1. 点击宠物卡片进入详情页
+2. 在聊天框输入消息与宠物对话
+3. 宠物会根据你的消息和当前状态做出反应
+4. 状态变化会实时显示在界面上
 
-### 聊天室
-- `GET /api/rooms/:agentId` - 获取房间列表
-- `POST /api/rooms/:agentId/join` - 加入房间
-- `POST /api/rooms/:agentId/leave` - 离开房间
-- `POST /api/rooms/:agentId/create` - 创建房间
+### 宠物形象
+- 点击"拍照"按钮生成当前状态的形象图
+- 形象图会根据宠物的心情、健康状态变化
+- 所有生成的图片保存在相册中
 
-### 监控
-- `GET /api/monitoring/status` - 状态摘要
-- `GET /api/monitoring/:agentId/metrics` - 监控指标
-- `GET /api/monitoring/:agentId/realtime` - 实时状态
+### 语音功能
+- 点击"朗读"按钮播放宠物当前想法
+- 在聊天中，宠物回复会自动播放语音
+- 支持切换音色（樱桃、赛琳娜、伊森、切尔茜）
 
-## 术语映射
+## 🔌 API 接口
 
-| 技术术语 | 用户友好名称 |
-|---------|-------------|
-| Agent | 智能助手 / AI 员工 |
-| openclaw.json | 助手档案 |
-| Gateway | 服务端口 |
-| Workspace | 工作空间 |
-| SKILL.md | 技能说明书 |
-| SOUL.md | 性格设定 |
-| Channel | 消息渠道 |
-| Room | 聊天室 |
-| Heartbeat | 在线时长 |
+### 宠物管理
+- `GET /api/pets` - 获取所有宠物列表
+- `GET /api/pets/:agentId` - 获取单个宠物详情
+- `POST /api/pets/:agentId/interact` - 与宠物互动
 
-## 开发计划
+### 聊天对话
+- `POST /api/pets/:agentId/chat` - 发送消息
+- `GET /api/pets/:agentId/chat/history` - 获取聊天历史
 
-- [x] 基础架构搭建
-- [x] Agent 列表与 CRUD
-- [x] 多标签配置编辑
-- [x] 飞书集成
-- [ ] 技能管理
-- [ ] 配置版本管理
-- [ ] 日志查看
-- [ ] 多维表格同步
+### 消息推送
+- `GET /api/pets/:agentId/messages` - 获取主动消息
+- `GET /api/pets/:agentId/messages/unread` - 获取未读消息
+- `POST /api/pets/:agentId/messages/read` - 标记已读
 
-## License
+### 图片管理
+- `POST /api/pets/:agentId/images` - 生成形象图
+- `GET /api/pets/:agentId/images` - 获取图片列表
+- `GET /api/pets/:agentId/images/file/:filename` - 获取图片文件
+
+### TTS 语音
+- `POST /api/pets/:agentId/tts` - 文字转语音
+- `GET /api/pets/:agentId/tts/voices` - 获取音色列表
+
+## 🧠 技术实现
+
+### AI 架构
+- **状态管理** - 宠物状态由 AI 自主决定，通过 STATE 块输出
+- **对话系统** - 直接调用 Agent 的 LLM API，保持人格一致性
+- **心跳机制** - 每 5 分钟触发 AI 更新状态，生成主动消息
+
+### 数据存储
+- **SQLite** - 宠物状态、聊天记录、图片元数据
+- **本地文件** - 生成的图片、TTS 音频文件
+- **OpenClaw** - 复用 Agent 的工作空间和配置文件
+
+### 第三方服务
+- **阿里云 TTS** - qwen-tts 模型，提供 4 种音色
+- **阿里云文生图** - Qwen-Image 模型，生成宠物形象
+
+## 📝 配置说明
+
+### 宠物性格设定
+
+在 `~/.openclaw/agents/{agentId}/SOUL.md` 中定义宠物的核心性格：
+
+```markdown
+# 灵魂档案
+
+## 核心特质
+- 活泼好动，喜欢运动
+- 对主人忠诚，粘人
+- 有点贪吃
+
+## 说话风格
+- 使用"汪汪"等拟声词
+- 喜欢用括号表达动作（摇尾巴）、（眨眼睛）
+- 语气可爱，充满能量
+```
+
+### 定时任务配置
+
+在 `backend/src/jobs/petHeartbeatJob.ts` 中调整心跳间隔：
+
+```typescript
+const DEFAULT_CONFIG: HeartbeatConfig = {
+  enabled: true,
+  intervalMinutes: 5  // 每 5 分钟执行一次
+};
+```
+
+## 🛠️ 开发计划
+
+- [x] 基础宠物状态管理
+- [x] AI 驱动的对话系统
+- [x] 阿里云 TTS 集成
+- [x] 阿里云文生图集成
+- [x] 主动消息推送
+- [x] 相册系统
+- [ ] 宠物进化分支
+- [ ] 多人互动（宠物社交）
+- [ ] 物品/道具系统
+- [ ] 成就系统
+
+## 📄 License
 
 MIT
+
+---
+
+**注意**：这是一个实验性项目，展示了如何将 OpenClaw Agent 转变为有生命的数字宠物。实际生产使用需要更多测试和优化。
