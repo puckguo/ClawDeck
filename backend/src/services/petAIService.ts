@@ -1231,6 +1231,174 @@ ${wasSleeping ? '\n你刚才正在睡觉，被主人叫醒了，还有点困。'
   }
 
   /**
+   * AI驱动的互动处理
+   * 让Agent决定互动反应和状态变化
+   */
+  async interact(agentId: string, type: string): Promise<{
+    success: boolean;
+    message: string;
+    effects: AttributeChange[];
+    petStatus: any;
+  }> {
+    const petData = await petService.getPetData(agentId);
+    if (!petData) {
+      throw new Error('Pet not found');
+    }
+
+    const interactionNames: Record<string, string> = {
+      feed: '喂食',
+      play: '玩耍',
+      pet: '抚摸',
+      sleep: '睡觉',
+      train: '训练',
+      clean: '清洁',
+      gift: '送礼物',
+      adventure: '探险',
+      treat: '治疗'
+    };
+
+    // 构建提示词
+    const systemPrompt = `你是${petData.status.name}，一只数字宠物。主人正在和你互动：${interactionNames[type] || type}。
+
+你的当前状态：
+- 心情：${petData.status.mood}
+- 饥饿度：${petData.status.hunger}/100
+- 开心度：${petData.status.happiness}/100
+- 精力：${petData.status.energy}/100
+- 健康：${petData.status.health}/100
+- 亲密度：${petData.status.affection}/100
+- 是否睡觉：${petData.status.isSleeping ? '是' : '否'}
+
+请生成：
+1. 你对这次互动的反应（1-2句话，可爱生动，用括号表达动作表情）
+2. 状态变化（JSON格式）
+
+请在回复末尾用以下格式输出状态变化：
+%%%EFFECTS%%%
+{"hunger": +/-数值, "happiness": +/-数值, "energy": +/-数值, "health": +/-数值, "affection": +/-数值, "experience": +/-数值}
+%%%END%%%
+
+注意：
+- 状态变化应该合理，总和不超过30点
+- 如果精力太低，玩耍类活动应该减少精力
+- 如果是喂食，应该增加饱食度
+- 如果是睡觉，应该增加精力`;
+
+    try {
+      // 获取AI配置
+      const aiConfig = await this.getAgentAIConfig(agentId);
+
+      let response: string;
+      if (aiConfig) {
+        response = await this.callLLM(
+          aiConfig,
+          systemPrompt,
+          [],
+          `主人正在${interactionNames[type] || type}，请做出反应。`,
+          petData.status.level
+        );
+      } else {
+        // 降级方案
+        response = this.generateLocalInteractionResponse(petData, type);
+      }
+
+      // 解析效果和消息
+      const { message, effects } = this.parseInteractionResponse(response, type);
+
+      // 应用效果
+      for (const effect of effects) {
+        this.applyEffect(petData.status, effect);
+      }
+
+      // 特殊处理：睡觉
+      if (type === 'sleep') {
+        petData.status.isSleeping = true;
+      }
+
+      // 更新心情
+      petData.status.mood = this.calculateMood(petData.status);
+
+      // 保存
+      await petService.savePetData(agentId, petData);
+
+      return {
+        success: true,
+        message,
+        effects,
+        petStatus: petData.status
+      };
+    } catch (error) {
+      console.error(`[PetAI] Interaction failed for ${agentId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 解析互动响应
+   */
+  private parseInteractionResponse(response: string, type: string): {
+    message: string;
+    effects: AttributeChange[];
+  } {
+    // 提取效果JSON
+    const effectsMatch = response.match(/%%%EFFECTS%%%([\s\S]*?)%%%END%%%/);
+    let effects: AttributeChange[] = [];
+
+    if (effectsMatch) {
+      try {
+        const effectsJson = JSON.parse(effectsMatch[1].trim());
+        effects = Object.entries(effectsJson).map(([attribute, delta]) => ({
+          attribute: attribute as keyof PetStatus,
+          delta: Number(delta),
+          reason: type
+        }));
+      } catch (e) {
+        console.error('Failed to parse effects:', e);
+      }
+    }
+
+    // 清理消息
+    const message = response.replace(/%%%EFFECTS%%%[\s\S]*?%%%END%%%/g, '').trim();
+
+    return { message, effects };
+  }
+
+  /**
+   * 生成本地互动响应（降级方案）
+   */
+  private generateLocalInteractionResponse(petData: PetData, type: string): string {
+    const { status } = petData;
+    const responses: Record<string, string[]> = {
+      feed: [
+        `（开心地吃）谢谢主人！好好吃呀～\n%%%EFFECTS%%%\n{"hunger": 30, "happiness": 5, "energy": 5, "experience": 10}\n%%%END%%%`,
+        `（狼吞虎咽）太好吃了！汪汪最爱主人了～\n%%%EFFECTS%%%\n{"hunger": 35, "happiness": 8, "affection": 3, "experience": 10}\n%%%END%%%`,
+      ],
+      play: [
+        `（兴奋地跳来跳去）好开心！最喜欢和主人玩了！\n%%%EFFECTS%%%\n{"happiness": 20, "energy": -10, "hunger": -5, "experience": 15, "affection": 3}\n%%%END%%%`,
+        `（转圈圈）哇！太有趣了！还要玩还要玩！\n%%%EFFECTS%%%\n{"happiness": 25, "energy": -12, "hunger": -5, "experience": 15}\n%%%END%%%`,
+      ],
+      pet: [
+        `（舒服地眯眼）被主人抚摸好舒服呀～\n%%%EFFECTS%%%\n{"happiness": 15, "affection": 8, "experience": 5}\n%%%END%%%`,
+        `（蹭蹭主人）好喜欢主人的抚摸～好温暖～\n%%%EFFECTS%%%\n{"happiness": 18, "affection": 10, "experience": 5}\n%%%END%%%`,
+      ],
+      sleep: [
+        `（打哈欠）晚安主人...汪汪去睡觉了...\n%%%EFFECTS%%%\n{"energy": 50, "health": 10, "happiness": 5}\n%%%END%%%`,
+        `（蜷缩成一团）好困...明天见主人...zzZ\n%%%EFFECTS%%%\n{"energy": 45, "health": 12, "happiness": 5}\n%%%END%%%`,
+      ],
+      train: [
+        `（认真学习）汪汪会努力的！\n%%%EFFECTS%%%\n{"intelligence": 5, "experience": 25, "energy": -15, "happiness": -5}\n%%%END%%%`,
+        `（思考状）这个好难...但汪汪会加油的！\n%%%EFFECTS%%%\n{"intelligence": 6, "experience": 25, "energy": -12, "happiness": -3}\n%%%END%%%`,
+      ],
+    };
+
+    const typeResponses = responses[type] || [
+      `（开心）谢谢主人！\n%%%EFFECTS%%%\n{"happiness": 10, "affection": 5, "experience": 5}\n%%%END%%%`
+    ];
+
+    return typeResponses[Math.floor(Math.random() * typeResponses.length)];
+  }
+
+  /**
    * 应用效果到状态
    */
   private applyEffect(status: PetStatus, effect: AttributeChange): void {

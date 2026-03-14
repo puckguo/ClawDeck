@@ -178,20 +178,66 @@ export default function PetA2UIPage() {
   const handleInteraction = async (type: string) => {
     if (!agentId || !pet) return
 
+    const interactionNames: Record<string, string> = {
+      feed: '喂食',
+      play: '玩耍',
+      pet: '抚摸',
+      sleep: '睡觉'
+    }
+
     try {
       const response = await petsApi.interact(agentId, type)
       if (response.success && response.data) {
-        const { messages: responseMessages } = response.data
+        const { messages: responseMessages, interaction, petStatus } = response.data
 
-        if (responseMessages.length > 0) {
-          notification.success({
-            message: responseMessages[0],
-            description: responseMessages.slice(1).join('，')
+        // 构建状态变化描述
+        const statusChanges: string[] = []
+        if (interaction?.effects) {
+          interaction.effects.forEach((effect: any) => {
+            const attrNames: Record<string, string> = {
+              hunger: '饱食度',
+              happiness: '开心度',
+              energy: '精力',
+              health: '健康',
+              affection: '亲密度',
+              experience: '经验值'
+            }
+            if (effect.delta !== 0) {
+              const sign = effect.delta > 0 ? '+' : ''
+              statusChanges.push(`${attrNames[effect.attribute] || effect.attribute}: ${sign}${effect.delta}`)
+            }
           })
         }
 
+        // 显示互动反馈通知
+        notification.success({
+          message: `${pet?.status?.name || '宠物'}${interactionNames[type] || type}`,
+          description: (
+            <div>
+              <div>{responseMessages[0] || '互动成功！'}</div>
+              {statusChanges.length > 0 && (
+                <div style={{ marginTop: 8, fontSize: 12, color: '#666' }}>
+                  {statusChanges.join('，')}
+                </div>
+              )}
+            </div>
+          ),
+          duration: 3
+        })
+
         // 刷新状态
         await loadPet()
+
+        // 如果宠物有回复消息，继续显示
+        if (responseMessages.length > 1) {
+          setTimeout(() => {
+            notification.info({
+              message: `${pet?.status?.name || '宠物'}`,
+              description: responseMessages.slice(1).join('，'),
+              duration: 5
+            })
+          }, 1000)
+        }
       }
     } catch (error) {
       notification.error({

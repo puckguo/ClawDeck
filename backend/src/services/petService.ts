@@ -27,6 +27,7 @@ import type {
   PetSummary
 } from '../../../shared/types';
 import { petDatabaseService } from './petDatabaseService';
+import { petAIService } from './petAIService';
 
 const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const PETS_DIR = path.join(OPENCLAW_ROOT, 'pets');
@@ -466,7 +467,8 @@ export class PetService {
   }
 
   /**
-   * 处理互动
+   * 处理互动 - AI驱动版本
+   * 让Agent决定互动反应和状态变化
    */
   async interact(agentId: string, type: InteractionType, data?: Record<string, unknown>): Promise<InteractResponse> {
     const petData = await this.getPetData(agentId);
@@ -483,27 +485,8 @@ export class PetService {
       throw new Error('宠物精力充沛，不想睡觉');
     }
 
-    // 获取互动效果
-    let effects = [...(INTERACTION_EFFECTS[type] || [])];
-
-    // 应用性格修正
-    effects = this.applyPersonalityModifiers(petData.status.personality, type, effects);
-
-    // 随机暴击（20%概率双倍经验）
-    const isCrit = Math.random() < 0.2;
-    if (isCrit) {
-      effects = effects.map(e =>
-        e.attribute === 'experience' ? { ...e, delta: e.delta * 2 } : e
-      );
-    }
-
-    // 应用效果
-    const oldStatus = { ...petData.status };
-    const messages: string[] = [];
-
-    for (const effect of effects) {
-      this.applyEffect(petData.status, effect);
-    }
+    // 调用AI处理互动
+    const aiResult = await petAIService.interact(agentId, type);
 
     // 更新状态时间戳
     const now = new Date().toISOString();
@@ -519,6 +502,7 @@ export class PetService {
 
     // 检查升级
     let levelUp = false;
+    const messages: string[] = [aiResult.message];
     while (petData.status.experience >= petData.status.experienceToNext && petData.status.level < 100) {
       petData.status.level++;
       petData.status.experience -= petData.status.experienceToNext;
@@ -528,10 +512,12 @@ export class PetService {
     }
 
     // 阶段进化检查
-    const stageEvolution = this.checkStageEvolution(petData.status);
-    if (stageEvolution) {
-      petData.status.stage = stageEvolution;
-      messages.push(`进化到了${this.getStageName(stageEvolution)}阶段！`);
+    let stageEvolution: PetStage | undefined;
+    const newStage = this.checkStageEvolution(petData.status);
+    if (newStage && newStage !== petData.status.stage) {
+      stageEvolution = newStage;
+      petData.status.stage = newStage;
+      messages.push(`进化到了${this.getStageName(newStage)}阶段！`);
     }
 
     // 检查进化分支
@@ -544,17 +530,13 @@ export class PetService {
       messages.push(`进化成了${unlockedBranch.name}！`);
     }
 
-    // 更新心情
-    petData.status.mood = this.calculateMood(petData.status);
-
     // 记录互动
     const interaction: Interaction = {
       id: uuidv4(),
       type,
       timestamp: now,
       data,
-      effects,
-      note: isCrit ? '暴击！' : undefined,
+      effects: aiResult.effects,
     };
     petData.interactions.unshift(interaction);
     if (petData.interactions.length > 100) {
@@ -563,6 +545,43 @@ export class PetService {
 
     // 保存互动记录到数据库
     petDatabaseService.addInteraction(agentId, interaction);
+
+    // 将互动记录为聊天消息
+    const interactionNames: Record<string, string> = {
+      feed: '喂食',
+      play: '玩耍',
+      pet: '抚摸',
+      sleep: '睡觉',
+      train: '训练',
+      clean: '清洁',
+      gift: '送礼物',
+      adventure: '探险',
+      treat: '治疗',
+      login: '登录'
+    };
+
+    // 主人互动的消息
+    const userMessage = {
+      id: uuidv4(),
+      role: 'user' as const,
+      content: `【${interactionNames[type] || type}】`,
+      timestamp: now,
+    };
+    petData.conversation.messages.push(userMessage);
+
+    // 宠物反应的消息
+    const petMessage = {
+      id: uuidv4(),
+      role: 'pet' as const,
+      content: aiResult.message,
+      timestamp: new Date().toISOString(),
+    };
+    petData.conversation.messages.push(petMessage);
+
+    // 限制聊天历史长度
+    if (petData.conversation.messages.length > 100) {
+      petData.conversation.messages = petData.conversation.messages.slice(-100);
+    }
 
     // 更新成就进度
     this.updateAchievementProgress(petData, type);
