@@ -178,9 +178,16 @@ export default function PetA2UIPage() {
         setChatMessage('')
         await loadChatHistory()
         await loadPet()
-        // 自动播放宠物回复的TTS
+        // 显示宠物回复
         if (response.data.message?.content) {
-          playPetVoice(response.data.message.content)
+          const replyContent = response.data.message.content.replace(/%%%STATE%%%[\s\S]*?%%%END%%%/g, '').trim()
+          notification.info({
+            message: `${pet?.status?.name || '宠物'}回复`,
+            description: replyContent,
+            duration: 5
+          })
+          // 自动播放宠物回复的TTS
+          playPetVoice(replyContent)
         }
       }
     } catch (error) {

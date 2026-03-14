@@ -86,7 +86,7 @@ export class PetAIService {
    * 生成宠物性格化的系统提示词
    * 新架构：AI自己决定并输出状态
    */
-  generatePersonalityPrompt(petData: PetData, agentId: string): string {
+  generatePersonalityPrompt(petData: PetData, agentId: string, wasSleeping: boolean = false): string {
     const { status } = petData;
     const personalityPrompt = PERSONALITY_PROMPTS[status.personality.type];
     const workspacePath = this.getWorkspacePath(agentId);
@@ -96,6 +96,7 @@ export class PetAIService {
 
 ## 性格设定
 ${personalityPrompt}
+${wasSleeping ? '\n你刚才正在睡觉，被主人叫醒了，还有点困。' : ''}
 
 ## 重要规则
 1. 保持角色一致性，始终以宠物的身份说话
@@ -604,13 +605,18 @@ ${personalityPrompt}
       throw new Error('Pet not found');
     }
 
-    // 如果宠物在睡觉，唤醒或返回睡眠回应
-    if (petData.status.isSleeping) {
-      return this.handleSleepingPet(petData, request.message);
+    console.log(`[PetChat] Chat request for agent ${agentId}, isSleeping: ${petData.status.isSleeping}`);
+
+    // 如果宠物在睡觉，先唤醒它
+    const wasSleeping = petData.status.isSleeping;
+    if (wasSleeping) {
+      console.log(`[PetChat] Waking up pet ${agentId}`);
+      petData.status.isSleeping = false;
+      petData.status.mood = 'sleepy';
     }
 
     // 生成系统提示词
-    const systemPrompt = this.generatePersonalityPrompt(petData, agentId);
+    const systemPrompt = this.generatePersonalityPrompt(petData, agentId, wasSleeping);
 
     // 构建对话历史（最近10轮）
     const recentMessages = petData.conversation.messages.slice(-10);
@@ -731,7 +737,7 @@ ${personalityPrompt}
 
   /**
    * 调用Agent的Chat API
-   * 直接使用Agent的AI配置调用LLM API
+   * 通过OpenClaw Gateway调用Agent的聊天功能
    */
   private async callChatAPI(
     systemPrompt: string,
@@ -740,13 +746,72 @@ ${personalityPrompt}
     petData: PetData,
     agentId: string
   ): Promise<{ content: string; emotionalTone?: string }> {
+    try {
+      // 调用OpenClaw Gateway的聊天端点
+      const gatewayUrl = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:3000';
+
+      // 构建消息历史
+      const messages = [
+        ...history.map(h => ({
+          role: h.role as 'user' | 'assistant',
+          content: h.content
+        })),
+        { role: 'user' as const, content: message }
+      ];
+
+      const response = await axios.post(
+        `${gatewayUrl}/api/agents/${agentId}/chat`,
+        {
+          messages,
+          systemPrompt, // 传递宠物角色提示词
+          stream: false
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 120000
+        }
+      );
+
+      if (response.data && response.data.message) {
+        return {
+          content: response.data.message.content || response.data.message,
+          emotionalTone: petData.status.mood,
+        };
+      }
+
+      // 如果gateway调用失败，回退到本地响应
+      return this.generateLocalResponse(petData, message);
+    } catch (error: any) {
+      console.error('[PetChat] Gateway chat failed:', error.message);
+      // 回退到直接调用LLM
+      return this.callLLMDirectly(systemPrompt, history, message, petData, agentId);
+    }
+  }
+
+  /**
+   * 直接调用LLM（降级方案）
+   */
+  private async callLLMDirectly(
+    systemPrompt: string,
+    history: { role: string; content: string }[],
+    message: string,
+    petData: PetData,
+    agentId: string
+  ): Promise<{ content: string; emotionalTone?: string }> {
+    console.log(`[PetChat] Calling LLM directly for agent ${agentId}`);
     // 获取agent的AI配置
     const aiConfig = await this.getAgentAIConfig(agentId);
     if (!aiConfig) {
+      console.log(`[PetChat] No AI config found, falling back to local response`);
       return this.generateLocalResponse(petData, message);
     }
 
+    console.log(`[PetChat] AI config found: provider=${aiConfig.provider}, model=${aiConfig.model}`);
+
     try {
+      console.log(`[PetChat] Calling LLM API...`);
       const response = await this.callLLM(
         aiConfig,
         systemPrompt,
@@ -754,12 +819,14 @@ ${personalityPrompt}
         message,
         petData.status.level
       );
+      console.log(`[PetChat] LLM API response received: ${response.substring(0, 100)}...`);
 
       return {
         content: response,
         emotionalTone: petData.status.mood,
       };
     } catch (error: any) {
+      console.error(`[PetChat] LLM API error: ${error.message}`);
       return this.generateLocalResponse(petData, message);
     }
   }
@@ -770,27 +837,32 @@ ${personalityPrompt}
   private async getAgentAIConfig(agentId: string): Promise<{provider: string, model: string, apiKey: string, baseUrl?: string} | null> {
     try {
       const configPath = path.join(AGENTS_DIR, agentId, 'openclaw.json');
+      console.log(`[PetChat] Looking for agent config at: ${configPath}`);
       if (!await fs.pathExists(configPath)) {
+        console.log(`[PetChat] Config not found at: ${configPath}`);
         return null;
       }
 
       const config = await fs.readJson(configPath);
+      console.log(`[PetChat] Loaded config for ${agentId}`);
 
       // 从 agents.defaults.model.primary 获取 provider 和 model
       const primaryModel = config?.agents?.defaults?.model?.primary || '';
+      console.log(`[PetChat] Primary model: ${primaryModel}`);
       const [provider, modelId] = primaryModel.split('/');
 
       if (!provider || !modelId) {
-        console.log(`No primary model configured for agent ${agentId}`);
+        console.log(`[PetChat] No primary model configured for agent ${agentId}`);
         return null;
       }
 
       // 从 models.providers 获取 provider 配置
       const providerConfig = config?.models?.providers?.[provider];
       if (!providerConfig) {
-        console.log(`No provider config found for ${provider}`);
+        console.log(`[PetChat] No provider config found for ${provider}`);
         return null;
       }
+      console.log(`[PetChat] Found provider config for ${provider}`);
 
       // 从 auth-profiles.json 获取 API key
       // 尝试多个可能的位置
@@ -801,15 +873,20 @@ ${personalityPrompt}
       ];
 
       let apiKey = '';
+      console.log(`[PetChat] Looking for auth-profiles.json...`);
       for (const authProfilesPath of possibleAuthPaths) {
+        console.log(`[PetChat] Checking: ${authProfilesPath}`);
         if (await fs.pathExists(authProfilesPath)) {
+          console.log(`[PetChat] Found auth-profiles.json at: ${authProfilesPath}`);
           try {
             const authData = await fs.readJson(authProfilesPath);
             const profileKey = `${provider}:default`;
+            console.log(`[PetChat] Looking for profile: ${profileKey}`);
             const profile = authData?.profiles?.[profileKey];
 
             if (profile?.type === 'api_key') {
               apiKey = profile.key;
+              console.log(`[PetChat] Found API key for ${provider}`);
               break;
             } else if (profile?.type === 'oauth') {
               apiKey = profile.access;
