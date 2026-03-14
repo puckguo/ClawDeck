@@ -43,20 +43,31 @@ export class PetMessageService {
    * 让Agent根据状态生成主动消息
    */
   async generateHeartbeatMessage(agentId: string): Promise<ProactiveMessage | null> {
+    console.log(`[PetMessage] Generating heartbeat message for ${agentId}`);
     const petData = await petService.getPetData(agentId);
-    if (!petData) return null;
+    if (!petData) {
+      console.log(`[PetMessage] Pet not found: ${agentId}`);
+      return null;
+    }
+
+    console.log(`[PetMessage] Pet status: isSleeping=${petData.status.isSleeping}, mood=${petData.status.mood}`);
 
     // 如果宠物在睡觉，减少消息频率
     if (petData.status.isSleeping) {
       // 只有20%概率在睡觉时发消息
-      if (Math.random() > 0.2) return null;
+      if (Math.random() > 0.2) {
+        console.log(`[PetMessage] Pet is sleeping, skipping message (80% chance)`);
+        return null;
+      }
     }
 
     try {
       // 调用AI生成消息
       const aiConfig = await this.getAgentAIConfig(agentId);
+      console.log(`[PetMessage] AI config: ${aiConfig ? 'found' : 'not found'}`);
       if (!aiConfig) {
         // 如果没有AI配置，使用默认消息
+        console.log(`[PetMessage] Using default message (no AI config)`);
         return this.createDefaultMessage(agentId, petData);
       }
 

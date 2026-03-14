@@ -30,6 +30,7 @@ export default function PetA2UIPage() {
   const [images, setImages] = useState<Array<{ type: string; prompt: string; localPath: string; generatedAt: string }>>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [latestImageUrl, setLatestImageUrl] = useState<string>('')
+  const [proactiveMessages, setProactiveMessages] = useState<Array<{id: string, content: string, timestamp: string}>>([])
 
   // 加载宠物数据
   const loadPet = async (showLoading = true) => {
@@ -120,20 +121,53 @@ export default function PetA2UIPage() {
     }
   }
 
+  // 加载主动消息
+  const loadProactiveMessages = async () => {
+    if (!agentId) return
+    try {
+      const response = await petsApi.getUnreadMessages(agentId)
+      if (response.success && response.data && response.data.length > 0) {
+        // 显示新消息通知
+        response.data.forEach((msg: any) => {
+          notification.info({
+            message: `${pet?.status?.name || '宠物'}的消息`,
+            description: msg.content,
+            duration: 5,
+            onClose: () => {
+              // 标记为已读
+              petsApi.markMessagesAsRead(agentId, msg.id)
+            }
+          })
+        })
+        // 刷新聊天历史
+        loadChatHistory()
+      }
+    } catch (error) {
+      console.error('Failed to load proactive messages:', error)
+    }
+  }
+
   // 初始加载
   useEffect(() => {
     loadPet()
     loadImages() // 加载最新图片
     loadChatHistory()
     loadTTSVoices()
+    loadProactiveMessages() // 加载主动消息
 
     // 定时刷新状态（不显示loading）
     const interval = setInterval(() => {
       loadPet(false)
     }, 5000)
 
+    // 定时获取主动消息（每30秒）
+    const messageInterval = setInterval(() => {
+      loadProactiveMessages()
+    }, 30000)
+
     return () => {
       clearInterval(interval)
+      clearInterval(messageInterval)
       if (audioRef.current) {
         audioRef.current.pause()
       }
