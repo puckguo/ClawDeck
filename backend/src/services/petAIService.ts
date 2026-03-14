@@ -1346,7 +1346,9 @@ ${wasSleeping ? '\n你刚才正在睡觉，被主人叫醒了，还有点困。'
 
     if (effectsMatch) {
       try {
-        const effectsJson = JSON.parse(effectsMatch[1].trim());
+        // 清理 JSON 中的 + 号（AI 可能输出 +5 而不是 5）
+        const cleanedJson = effectsMatch[1].trim().replace(/: \+(\d+)/g, ': $1');
+        const effectsJson = JSON.parse(cleanedJson);
         effects = Object.entries(effectsJson).map(([attribute, delta]) => ({
           attribute: attribute as keyof PetStatus,
           delta: Number(delta),
