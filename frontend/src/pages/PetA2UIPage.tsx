@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, Spin, Drawer, List, Tag, Select, App } from 'antd'
+import { Button, Spin, Drawer, List, Tag, Select, App, Modal } from 'antd'
 import { ArrowLeftOutlined, MessageOutlined, HistoryOutlined, CameraOutlined, SoundOutlined, PictureOutlined } from '@ant-design/icons'
 import { petsApi } from '../api/pets'
 import type { PetChatMessage } from '../../../shared/types'
