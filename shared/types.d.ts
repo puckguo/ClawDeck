@@ -165,6 +165,12 @@ export interface CreateAgentRequest {
     displayName: string;
     emoji: string;
     role?: string;
+    ai?: {
+        provider: string;
+        model: string;
+        apiKey?: string;
+        baseUrl?: string;
+    };
     feishu?: {
         enabled: boolean;
         appId: string;
@@ -266,5 +272,295 @@ export interface ConversationStep {
     field: string;
     options?: string[];
     validation?: (input: string) => boolean | string;
+}
+export interface Skill {
+    slug: string;
+    name: string;
+    description?: string;
+    version?: string;
+    author?: string;
+    tags?: string[];
+    category?: string;
+    downloads?: number;
+    stars?: number;
+    isOfficial?: boolean;
+    installPath?: string;
+    installedAt?: string;
+    updatedAt?: string;
+    repository?: string;
+    homepage?: string;
+    license?: string;
+}
+export interface SkillSearchRequest {
+    query: string;
+    filters?: {
+        category?: string;
+        minDownloads?: number;
+        minStars?: number;
+        tags?: string[];
+        officialOnly?: boolean;
+    };
+    limit?: number;
+}
+export interface SkillSearchResponse {
+    query: string;
+    skills: Skill[];
+    total: number;
+    aiInterpretation?: string;
+    suggestedQueries?: string[];
+}
+export interface SkillInstallRequest {
+    slug: string;
+    version?: string;
+    targetAgentId?: string;
+}
+export interface SkillInstallResponse {
+    success: boolean;
+    slug: string;
+    version?: string;
+    installPath?: string;
+    message?: string;
+    error?: string;
+}
+export interface SkillCategory {
+    id: string;
+    name: string;
+    description: string;
+}
+export interface AIProviderConfig {
+    provider: string;
+    model: string;
+    apiKey: string;
+    baseUrl: string;
+}
+/** 宠物生命阶段 */
+export type PetStage = 'egg' | 'baby' | 'child' | 'teen' | 'adult' | 'special';
+/** 宠物性格类型 */
+export type PersonalityType = 'cheerful' | 'calm' | 'curious' | 'stubborn' | 'gentle' | 'mysterious';
+/** 宠物情绪状态 */
+export type PetMood = 'ecstatic' | 'happy' | 'content' | 'neutral' | 'sad' | 'angry' | 'sick' | 'sleepy' | 'sleeping';
+/** 互动类型 */
+export type InteractionType = 'feed' | 'play' | 'train' | 'sleep' | 'chat' | 'pet' | 'clean' | 'gift' | 'adventure' | 'treat' | 'login';
+/** 性格特质 */
+export interface PersonalityTraits {
+    sociability: number;
+    curiosity: number;
+    independence: number;
+    playfulness: number;
+    stubbornness: number;
+}
+/** 宠物性格 */
+export interface PetPersonality {
+    type: PersonalityType;
+    traits: PersonalityTraits;
+    description?: string;
+}
+/** 宠物核心状态 */
+export interface PetStatus {
+    agentId: string;
+    name: string;
+    avatar: string;
+    stage: PetStage;
+    level: number;
+    experience: number;
+    experienceToNext: number;
+    hunger: number;
+    happiness: number;
+    energy: number;
+    health: number;
+    cleanliness: number;
+    intelligence: number;
+    affection: number;
+    strength: number;
+    agility: number;
+    personality: PetPersonality;
+    mood: PetMood;
+    isSleeping: boolean;
+    isSick: boolean;
+    evolutionPoints: number;
+    bornAt: string;
+    lastFedAt: string;
+    lastPlayedAt: string;
+    lastTrainedAt: string;
+    lastSleptAt: string;
+    lastInteractionAt: string;
+    totalPlayTime: number;
+    consecutiveLoginDays: number;
+}
+/** 宠物外观 */
+export interface PetAppearance {
+    baseForm: string;
+    color: string;
+    accessories: PetAccessory[];
+    unlockedForms: string[];
+    currentSkin?: string;
+}
+/** 装饰品 */
+export interface PetAccessory {
+    id: string;
+    name: string;
+    type: 'hat' | 'glasses' | 'necklace' | 'clothes' | 'background' | 'effect';
+    equipped: boolean;
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+    obtainedAt: string;
+}
+/** 进化分支 */
+export interface EvolutionBranch {
+    id: string;
+    name: string;
+    description: string;
+    requiredLevel: number;
+    requiredPersonality?: Partial<PersonalityTraits>;
+    requiredIntelligence?: number;
+    requiredAffection?: number;
+    specialConditions?: string[];
+    appearance: string;
+    specialAbility?: string;
+    unlocked: boolean;
+}
+/** 互动记录 */
+export interface Interaction {
+    id: string;
+    type: InteractionType;
+    timestamp: string;
+    data?: Record<string, unknown>;
+    effects: AttributeChange[];
+    note?: string;
+}
+/** 属性变化 */
+export interface AttributeChange {
+    attribute: keyof PetStatus | 'experience' | 'evolutionPoints';
+    delta: number;
+    reason: string;
+}
+/** 聊天消息 */
+export interface PetChatMessage {
+    id: string;
+    role: 'user' | 'pet' | 'system';
+    content: string;
+    timestamp: string;
+    emotionalTone?: string;
+    effects?: AttributeChange[];
+}
+/** 宠物对话历史 */
+export interface PetConversation {
+    messages: PetChatMessage[];
+    contextSummary?: string;
+    lastContextWindow?: number;
+}
+/** 每日任务 */
+export interface DailyTask {
+    id: string;
+    type: InteractionType | 'login' | 'consecutive_login';
+    description: string;
+    targetCount: number;
+    currentCount: number;
+    completed: boolean;
+    reward: TaskReward;
+}
+/** 任务奖励 */
+export interface TaskReward {
+    experience?: number;
+    affection?: number;
+    items?: PetAccessory[];
+    evolutionPoints?: number;
+}
+/** 成就 */
+export interface PetAchievement {
+    id: string;
+    name: string;
+    description: string;
+    category: 'care' | 'growth' | 'interaction' | 'social' | 'special';
+    unlockedAt?: string;
+    progress: number;
+    targetProgress: number;
+    unlocked: boolean;
+    reward?: TaskReward;
+}
+/** 宠物完整数据 */
+export interface PetData {
+    status: PetStatus;
+    appearance: PetAppearance;
+    evolutionBranches: EvolutionBranch[];
+    currentBranch?: string;
+    interactions: Interaction[];
+    conversation: PetConversation;
+    dailyTasks: DailyTask[];
+    achievements: PetAchievement[];
+    inventory: PetItem[];
+}
+/** 宠物物品 */
+export interface PetItem {
+    id: string;
+    name: string;
+    type: 'food' | 'toy' | 'medicine' | 'gift' | 'material';
+    description: string;
+    quantity: number;
+    effects?: AttributeChange[];
+    rarity: 'common' | 'rare' | 'epic' | 'legendary';
+}
+/** 随机事件 */
+export interface RandomEvent {
+    id: string;
+    type: 'positive' | 'neutral' | 'negative';
+    title: string;
+    description: string;
+    triggerCondition: string;
+    choices?: {
+        text: string;
+        effects: AttributeChange[];
+    }[];
+    autoEffects?: AttributeChange[];
+}
+/** 前端展示的宠物摘要 */
+export interface PetSummary {
+    agentId: string;
+    name: string;
+    stage: PetStage;
+    level: number;
+    mood: PetMood;
+    avatar: string;
+    affection: number;
+    lastInteractionAt: string;
+    isSleeping: boolean;
+    needsAttention: boolean;
+}
+/** 创建宠物请求 */
+export interface CreatePetRequest {
+    agentId: string;
+    name: string;
+    eggType?: 'classic' | 'sparkle' | 'mystery' | 'golden';
+}
+/** 互动请求 */
+export interface InteractRequest {
+    type: InteractionType;
+    data?: Record<string, unknown>;
+}
+/** 互动响应 */
+export interface InteractResponse {
+    success: boolean;
+    interaction: Interaction;
+    petStatus: PetStatus;
+    evolutionTriggered?: EvolutionBranch;
+    levelUp?: boolean;
+    messages: string[];
+}
+/** 聊天请求 */
+export interface PetChatRequest {
+    message: string;
+}
+/** 聊天响应 */
+export interface PetChatResponse {
+    message: PetChatMessage;
+    petStatus: PetStatus;
+    effects: AttributeChange[];
+    moodChanged?: boolean;
+}
+/** 宠物状态更新推送 */
+export interface PetStatusUpdate {
+    agentId: string;
+    status: Partial<PetStatus>;
+    trigger: 'decay' | 'interaction' | 'event' | 'time';
+    timestamp: string;
 }
 //# sourceMappingURL=types.d.ts.map

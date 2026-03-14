@@ -5,7 +5,10 @@ import {
   TeamOutlined,
   DashboardOutlined,
   SettingOutlined,
-  PlusOutlined
+  PlusOutlined,
+  ShoppingOutlined,
+  DollarOutlined,
+  HeartFilled
 } from '@ant-design/icons'
 
 export default function Sidebar() {
@@ -15,14 +18,29 @@ export default function Sidebar() {
 
   const menuItems = [
     {
+      key: '/pets',
+      icon: <HeartFilled style={{ color: '#ff4d4f' }} />,
+      label: '🐾 我的宠物'
+    },
+    {
+      key: '/skills',
+      icon: <ShoppingOutlined />,
+      label: t('nav.skillsMarket')
+    },
+    {
+      key: '/bountyclaw',
+      icon: <DollarOutlined />,
+      label: '🦞 龙虾众包'
+    },
+    {
       key: '/agents',
       icon: <TeamOutlined />,
-      label: t('nav.agentManagement')
+      label: '高级: Agent管理'
     },
     {
       key: '/agents/create',
       icon: <PlusOutlined />,
-      label: t('nav.createAgent')
+      label: '高级: 创建Agent'
     },
     {
       key: '/monitoring',
@@ -37,9 +55,9 @@ export default function Sidebar() {
   ]
 
   // 处理子路由匹配
-  const selectedKey = menuItems.find(item =>
-    location.pathname.startsWith(item.key)
-  )?.key || '/agents'
+  const selectedKey = menuItems
+    .find(item => item.key && location.pathname.startsWith(item.key)
+  )?.key || '/pets'
 
   return (
     <Menu

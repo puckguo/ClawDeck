@@ -1,18 +1,23 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { Layout, Select, Space } from 'antd'
+import { Routes, Route, Navigate, Link } from 'react-router-dom'
+import { Layout, Select, Space, Button } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { GlobalOutlined } from '@ant-design/icons'
+import { GlobalOutlined, ShoppingOutlined } from '@ant-design/icons'
 import Sidebar from './components/Sidebar'
 import AgentList from './pages/AgentList'
 import AgentDetail from './pages/AgentDetail'
 import AgentCreate from './pages/AgentCreate'
 import Monitoring from './pages/Monitoring'
 import Settings from './pages/Settings'
+import SkillsMarket from './pages/SkillsMarket'
+import BountyClaw from './pages/BountyClaw'
+import PetHome from './pages/PetHome'
+import PetDetail from './pages/PetDetail'
+import PetA2UIPage from './pages/PetA2UIPage'
 
 const { Content, Sider, Header } = Layout
 
 function App() {
-  const { t, i18n } = useTranslation()
+  const { i18n } = useTranslation()
 
   const handleLanguageChange = (value: string) => {
     i18n.changeLanguage(value)
@@ -21,8 +26,13 @@ function App() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
-        <h1 style={{ margin: 0, fontSize: '20px' }}>🐾 {t('common.appName')}</h1>
+        <h1 style={{ margin: 0, fontSize: '20px' }}>🐾 OpenClaw Pet - 数字宠物养成</h1>
         <Space>
+          <Link to="/bountyclaw">
+            <Button type="primary" icon={<ShoppingOutlined />} style={{ marginRight: 16 }}>
+              🦞 龙虾众包
+            </Button>
+          </Link>
           <GlobalOutlined />
           <Select
             value={i18n.language}
@@ -41,12 +51,19 @@ function App() {
         </Sider>
         <Content style={{ padding: '24px', overflow: 'auto' }}>
           <Routes>
-            <Route path="/" element={<Navigate to="/agents" replace />} />
+            <Route path="/" element={<Navigate to="/pets" replace />} />
+            {/* 宠物养成系统路由 */}
+            <Route path="/pets" element={<PetHome />} />
+            <Route path="/pets/:id" element={<PetDetail />} />
+            <Route path="/pets/:id/canvas" element={<PetA2UIPage />} />
+            {/* 原有Agent管理路由（保留作为高级功能） */}
             <Route path="/agents" element={<AgentList />} />
             <Route path="/agents/create" element={<AgentCreate />} />
             <Route path="/agents/:id" element={<AgentDetail />} />
             <Route path="/monitoring" element={<Monitoring />} />
+            <Route path="/skills" element={<SkillsMarket />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/bountyclaw" element={<BountyClaw />} />
           </Routes>
         </Content>
       </Layout>

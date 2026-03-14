@@ -19,6 +19,7 @@ import type {
   UpdateAgentRequest,
   ConfigVersion
 } from '../types';
+import { petService } from './petService';
 
 const execAsync = promisify(exec);
 const isWindows = process.platform === 'win32';
@@ -28,6 +29,7 @@ const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.ope
 const AGENTS_DIR = path.join(OPENCLAW_ROOT, 'agents');
 const WORKSPACES_DIR = path.join(OPENCLAW_ROOT, 'workspaces');
 const VERSIONS_DIR = path.join(OPENCLAW_ROOT, '.config-versions');
+const PETS_DIR = path.join(OPENCLAW_ROOT, 'pets');
 const LOGS_DIR = process.env.LOGS_DIR || (isWindows ? path.join(os.tmpdir(), 'agent-config-ui') : '/tmp/agent-config-ui');
 
 // AI Provider API Key 环境变量映射（与 OpenClaw 保持一致）
@@ -437,6 +439,15 @@ export class AgentService {
       throw new Error('Failed to create agent');
     }
 
+    // 自动创建关联的宠物
+    try {
+      await petService.createPet(agentId, request.displayName || request.name, 'classic');
+      console.log(`Pet created for agent ${agentId}`);
+    } catch (petError) {
+      // 宠物创建失败不阻断agent创建
+      console.error(`Failed to create pet for agent ${agentId}:`, petError);
+    }
+
     return agent;
   }
 
@@ -809,6 +820,7 @@ start /B openclaw gateway --port ${port} > "${logFile}" 2>&1
 
     const agentDir = path.join(AGENTS_DIR, agentId);
     const workspaceDir = path.join(WORKSPACES_DIR, agentId);
+    const petDir = path.join(PETS_DIR, agentId);
 
     // 备份配置
     const config = await this.getAgentConfig(agentId);
@@ -819,6 +831,12 @@ start /B openclaw gateway --port ${port} > "${logFile}" 2>&1
     // 删除目录
     await fs.remove(agentDir);
     await fs.remove(workspaceDir);
+
+    // 同步删除关联的宠物
+    if (await fs.pathExists(petDir)) {
+      await fs.remove(petDir);
+      console.log(`Pet deleted for agent ${agentId}`);
+    }
 
     // 刷新缓存
     this.agentCache.delete(agentId);

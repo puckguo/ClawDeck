@@ -36,6 +36,7 @@
     "agentManagement": "Agent Management",
     "createAgent": "Create Agent",
     "monitoring": "Monitoring",
+    "skillsMarket": "Skills Market",
     "systemSettings": "System Settings",
     "guide": "User Guide"
   },
@@ -575,5 +576,144 @@
   "channels": {
     "feishu": "Feishu",
     "chat": "Chat"
+  },
+  "skills": {
+    "marketTitle": "Skills Market",
+    "searchPlaceholder": "Search skills by name, description or tags",
+    "tabMarket": "Market",
+    "tabInstalled": "Installed",
+    "noSkillsFound": "No matching skills found",
+    "noInstalledSkills": "No skills installed yet",
+    "viewDetails": "View Details",
+    "details": "Details",
+    "install": "Install",
+    "installSuccess": "Install successful",
+    "installFailed": "Install failed",
+    "installed": "Installed",
+    "alreadyInstalled": "Already installed",
+    "uninstall": "Uninstall",
+    "uninstallSuccess": "Uninstall successful",
+    "noDescription": "No description",
+    "official": "Official",
+    "skillDetails": "Skill Details",
+    "name": "Name",
+    "slug": "Slug",
+    "description": "Description",
+    "version": "Version",
+    "author": "Author",
+    "category": "Category",
+    "tags": "Tags",
+    "license": "License",
+    "stats": "Statistics",
+    "downloads": "Downloads",
+    "stars": "Stars",
+    "repository": "Repository",
+    "homepage": "Homepage",
+    "installSkill": "Install Skill",
+    "installConfirm": "Are you sure you want to install {{name}}?",
+    "targetAgent": "Target Agent",
+    "optional": "optional",
+    "selectAgent": "Select Agent to install to",
+    "targetAgentHint": "If not selected, will be installed to global skills directory",
+    "installedAt": "Installed at"
+  },
+  "pet": {
+    "title": "My Pets",
+    "subtitle": "Take care of your digital companion and build a deep emotional connection",
+    "createNew": "Hatch New Pet",
+    "create": {
+      "title": "Hatch New Pet",
+      "nameLabel": "Pet Name",
+      "namePlaceholder": "Give your pet a cute name",
+      "eggType": "Choose Egg",
+      "hint": "Different eggs may hatch pets with different personalities!",
+      "eggTypes": {
+        "classic": "Classic Egg",
+        "sparkle": "Sparkle Egg",
+        "mystery": "Mystery Egg",
+        "golden": "Golden Egg"
+      }
+    },
+    "empty": "No pets yet, hatch one!",
+    "status": {
+      "hunger": "Hunger",
+      "happiness": "Happiness",
+      "energy": "Energy",
+      "health": "Health",
+      "cleanliness": "Cleanliness",
+      "affection": "Affection",
+      "intelligence": "Intelligence",
+      "strength": "Strength",
+      "agility": "Agility"
+    },
+    "stages": {
+      "egg": "Egg",
+      "baby": "Baby",
+      "child": "Child",
+      "teen": "Teen",
+      "adult": "Adult",
+      "special": "Special"
+    },
+    "moods": {
+      "ecstatic": "Ecstatic",
+      "happy": "Happy",
+      "content": "Content",
+      "neutral": "Neutral",
+      "sad": "Sad",
+      "angry": "Angry",
+      "sick": "Sick",
+      "sleepy": "Sleepy",
+      "sleeping": "Sleeping"
+    },
+    "interactions": {
+      "feed": "Feed",
+      "play": "Play",
+      "train": "Train",
+      "sleep": "Sleep",
+      "chat": "Chat",
+      "pet": "Pet",
+      "clean": "Clean",
+      "gift": "Gift",
+      "adventure": "Adventure",
+      "treat": "Treat"
+    },
+    "personalities": {
+      "cheerful": "Cheerful",
+      "calm": "Calm",
+      "curious": "Curious",
+      "stubborn": "Stubborn",
+      "gentle": "Gentle",
+      "mysterious": "Mysterious"
+    },
+    "tabs": {
+      "interact": "Interact",
+      "chat": "Chat",
+      "growth": "Growth",
+      "achievements": "Achievements",
+      "memory": "Memory"
+    },
+    "dailyTasks": "Daily Tasks",
+    "achievements": "Achievements",
+    "chat": {
+      "placeholder": "Say something to your pet...",
+      "send": "Send",
+      "empty": "Start chatting with your pet!"
+    },
+    "messages": {
+      "createSuccess": "{{name}} has hatched!",
+      "createFailed": "Creation failed",
+      "feedSuccess": "Feed successful",
+      "playSuccess": "Play successful",
+      "trainSuccess": "Train successful",
+      "sleepSuccess": "Good night, sweet dreams~",
+      "wakeUp": "Pet woke up",
+      "levelUp": "Level up! Now level {{level}}!",
+      "evolution": "Evolved to {{stage}} stage!",
+      "evolutionBranch": "Evolved into {{name}}!",
+      "needAttention": "Needs owner's care",
+      "sickWarning": "Pet is sick and needs treatment",
+      "hungryWarning": "Pet is hungry, please feed",
+      "sleepyWarning": "Pet is sleepy, let it rest"
+    }
   }
 }

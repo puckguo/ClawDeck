@@ -320,3 +320,66 @@ export interface ConversationStep {
   options?: string[];
   validation?: (input: string) => boolean | string;
 }
+
+// ============ Skills Market 类型 ============
+
+export interface Skill {
+  slug: string;
+  name: string;
+  description?: string;
+  version?: string;
+  author?: string;
+  tags?: string[];
+  category?: string;
+  downloads?: number;
+  stars?: number;
+  isOfficial?: boolean;
+  installPath?: string;
+  installedAt?: string;
+  updatedAt?: string;
+  repository?: string;
+  homepage?: string;
+  license?: string;
+}
+
+export interface SkillSearchRequest {
+  query: string;
+  filters?: {
+    category?: string;
+    minDownloads?: number;
+    minStars?: number;
+    tags?: string[];
+    officialOnly?: boolean;
+  };
+  limit?: number;
+}
+
+export interface SkillSearchResponse {
+  query: string;
+  skills: Skill[];
+  total: number;
+  aiInterpretation?: string;
+  suggestedQueries?: string[];
+}
+
+export interface SkillInstallRequest {
+  slug: string;
+  version?: string;
+  targetAgentId?: string;
+}
+
+export interface SkillInstallResponse {
+  success: boolean;
+  slug: string;
+  version?: string;
+  installPath?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface AIProviderConfig {
+  provider: string;
+  model: string;
+  apiKey: string;
+  baseUrl: string;
+}

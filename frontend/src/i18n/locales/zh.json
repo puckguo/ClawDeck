@@ -36,6 +36,7 @@
     "agentManagement": "Agent 管理",
     "createAgent": "创建 Agent",
     "monitoring": "实时监控",
+    "skillsMarket": "技能市场",
     "systemSettings": "系统设置",
     "guide": "使用向导"
   },
@@ -575,5 +576,144 @@
   "channels": {
     "feishu": "飞书",
     "chat": "Chat"
+  },
+  "skills": {
+    "marketTitle": "技能市场",
+    "searchPlaceholder": "搜索技能名称、描述或标签",
+    "tabMarket": "技能市场",
+    "tabInstalled": "已安装",
+    "noSkillsFound": "没有找到匹配的技能",
+    "noInstalledSkills": "还没有安装任何技能",
+    "viewDetails": "查看详情",
+    "details": "详情",
+    "install": "安装",
+    "installSuccess": "安装成功",
+    "installFailed": "安装失败",
+    "installed": "已安装",
+    "alreadyInstalled": "已安装",
+    "uninstall": "卸载",
+    "uninstallSuccess": "卸载成功",
+    "noDescription": "暂无描述",
+    "official": "官方",
+    "skillDetails": "技能详情",
+    "name": "名称",
+    "slug": "标识",
+    "description": "描述",
+    "version": "版本",
+    "author": "作者",
+    "category": "分类",
+    "tags": "标签",
+    "license": "许可证",
+    "stats": "统计",
+    "downloads": "下载",
+    "stars": "星标",
+    "repository": "仓库",
+    "homepage": "主页",
+    "installSkill": "安装技能",
+    "installConfirm": "确定要安装 {{name}} 吗？",
+    "targetAgent": "目标 Agent",
+    "optional": "可选",
+    "selectAgent": "选择要安装到的 Agent",
+    "targetAgentHint": "如果不选择，将安装到全局技能目录",
+    "installedAt": "安装时间"
+  },
+  "pet": {
+    "title": "我的宠物",
+    "subtitle": "照顾你的数字伙伴，与它建立深厚的情感连接",
+    "createNew": "孵化新宠物",
+    "create": {
+      "title": "孵化新宠物",
+      "nameLabel": "宠物名字",
+      "namePlaceholder": "给你的宠物起个可爱的名字",
+      "eggType": "选择蛋蛋",
+      "hint": "不同蛋蛋可能孵化出不同性格的宠物哦！",
+      "eggTypes": {
+        "classic": "经典蛋",
+        "sparkle": "闪耀蛋",
+        "mystery": "神秘蛋",
+        "golden": "黄金蛋"
+      }
+    },
+    "empty": "还没有宠物，孵化一个吧！",
+    "status": {
+      "hunger": "饥饿度",
+      "happiness": "心情值",
+      "energy": "精力值",
+      "health": "健康值",
+      "cleanliness": "清洁度",
+      "affection": "亲密度",
+      "intelligence": "智力",
+      "strength": "力量",
+      "agility": "敏捷"
+    },
+    "stages": {
+      "egg": "蛋蛋",
+      "baby": "婴儿",
+      "child": "儿童",
+      "teen": "少年",
+      "adult": "成年",
+      "special": "特殊形态"
+    },
+    "moods": {
+      "ecstatic": " ecstatic",
+      "happy": "开心",
+      "content": "满足",
+      "neutral": "平静",
+      "sad": "难过",
+      "angry": "生气",
+      "sick": "生病",
+      "sleepy": "困倦",
+      "sleeping": "睡觉中"
+    },
+    "interactions": {
+      "feed": "喂食",
+      "play": "玩耍",
+      "train": "训练",
+      "sleep": "睡觉",
+      "chat": "聊天",
+      "pet": "抚摸",
+      "clean": "清洁",
+      "gift": "送礼",
+      "adventure": "探险",
+      "treat": "治疗"
+    },
+    "personalities": {
+      "cheerful": "活泼开朗",
+      "calm": "温和安静",
+      "curious": "好奇探索",
+      "stubborn": "倔强忠诚",
+      "gentle": "温柔体贴",
+      "mysterious": "神秘深邃"
+    },
+    "tabs": {
+      "interact": "互动",
+      "chat": "聊天",
+      "growth": "成长",
+      "achievements": "成就",
+      "memory": "回忆"
+    },
+    "dailyTasks": "每日任务",
+    "achievements": "成就",
+    "chat": {
+      "placeholder": "和宠物说点什么...",
+      "send": "发送",
+      "empty": "开始和宠物聊天吧！"
+    },
+    "messages": {
+      "createSuccess": "{{name}} 已经孵化！",
+      "createFailed": "创建失败",
+      "feedSuccess": "喂食成功",
+      "playSuccess": "玩耍成功",
+      "trainSuccess": "训练成功",
+      "sleepSuccess": "晚安，好梦~",
+      "wakeUp": "宠物醒来了",
+      "levelUp": "升级了！现在是 {{level}} 级！",
+      "evolution": "进化到了 {{stage}} 阶段！",
+      "evolutionBranch": "进化成了 {{name}}！",
+      "needAttention": "需要主人的关爱",
+      "sickWarning": "宠物生病了，需要治疗",
+      "hungryWarning": "宠物饿了，快喂食吧",
+      "sleepyWarning": "宠物困了，让它休息吧"
+    }
   }
 }
