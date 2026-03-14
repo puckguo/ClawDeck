@@ -16,18 +16,12 @@ const ALIYUN_TTS_URL = 'https://dashscope.aliyuncs.com/api/v1/services/aigc/mult
 const OPENCLAW_ROOT = process.env.OPENCLAW_ROOT || path.join(os.homedir(), '.openclaw');
 const TTS_DIR = path.join(OPENCLAW_ROOT, 'tts');
 
-// 支持的音色列表
+// 支持的音色列表 (qwen-tts 模型只支持这些)
 export const TTS_VOICES = [
   { id: 'Cherry', name: '樱桃', description: '活泼可爱女声', language: 'Chinese' },
-  { id: 'Xiaoxue', name: '小雪', description: '温柔女声', language: 'Chinese' },
-  { id: 'Xiaowen', name: '小文', description: '成熟女声', language: 'Chinese' },
-  { id: 'Xiaomei', name: '小美', description: '甜美女声', language: 'Chinese' },
-  { id: 'Xiaoyu', name: '小雨', description: '清新女声', language: 'Chinese' },
-  { id: 'Aixuan', name: '艾轩', description: '温柔男声', language: 'Chinese' },
-  { id: 'Xiaoming', name: '小明', description: '阳光男声', language: 'Chinese' },
-  { id: 'Xiaogang', name: '小刚', description: '磁性男声', language: 'Chinese' },
-  { id: 'Xiaobao', name: '小宝', description: '童声', language: 'Chinese' },
-  { id: 'Longxia', name: '龙夏', description: '卡通声音', language: 'Chinese' },
+  { id: 'Serena', name: '赛琳娜', description: '温柔女声', language: 'English' },
+  { id: 'Ethan', name: '伊森', description: '阳光男声', language: 'English' },
+  { id: 'Chelsie', name: '切尔茜', description: '甜美女声', language: 'English' },
 ];
 
 export interface TTSResult {
@@ -66,11 +60,10 @@ export class TTSService {
       const cleanText = this.cleanTextForTTS(text);
 
       const requestBody = {
-        model: 'qwen3-tts-flash',
+        model: 'qwen-tts',
         input: {
           text: cleanText,
-          voice: voice,
-          language_type: languageType
+          voice: voice
         }
       };
 
@@ -104,9 +97,12 @@ export class TTSService {
       };
     } catch (error: any) {
       console.error('TTS generation failed:', error.message);
+      if (error.response) {
+        console.error('TTS error response:', JSON.stringify(error.response.data));
+      }
       return {
         success: false,
-        error: error.message,
+        error: error.response?.data?.message || error.message,
         voice
       };
     }
@@ -218,12 +214,13 @@ export class TTSService {
    * 为宠物选择合适的默认音色
    */
   getDefaultVoice(personalityType: string): string {
+    // qwen-tts 模型只支持 Cherry, Serena, Ethan, Chelsie
     const voiceMap: Record<string, string> = {
       'cheerful': 'Cherry',
-      'calm': 'Xiaoxue',
-      'curious': 'Xiaobao',
-      'stubborn': 'Xiaogang',
-      'gentle': 'Xiaomei'
+      'calm': 'Serena',
+      'curious': 'Chelsie',
+      'stubborn': 'Ethan',
+      'gentle': 'Serena'
     };
 
     return voiceMap[personalityType] || 'Cherry';
