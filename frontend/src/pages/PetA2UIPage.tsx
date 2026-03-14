@@ -456,7 +456,11 @@ export default function PetA2UIPage() {
                     borderRadius: 12,
                     background: msg.role === 'user' ? '#1890ff' : '#f0f0f0',
                     color: msg.role === 'user' ? '#fff' : '#333',
-                    maxWidth: '80%'
+                    maxWidth: '80%',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'pre-wrap',
+                    textAlign: 'left'
                   }}
                 >
                   {msg.content}
