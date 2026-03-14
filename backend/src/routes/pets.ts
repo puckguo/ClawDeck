@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import { petService } from '../services/petService';
 import { petAIService } from '../services/petAIService';
+import { petMessageService } from '../services/petMessageService';
 import { createError } from '../middleware/errorHandler';
 import type { InteractionType, CreatePetRequest } from '../../../shared/types';
 
@@ -588,6 +589,61 @@ router.get('/:agentId/tts/latest', async (req, res, next) => {
     }
 
     res.sendFile(latestPath);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/pets/:agentId/messages
+ * 获取宠物的主动消息
+ */
+router.get('/:agentId/messages', async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 20;
+    const messages = petMessageService.getMessages(req.params.agentId, limit);
+
+    res.json({
+      success: true,
+      data: messages,
+      count: messages.length
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/pets/:agentId/messages/unread
+ * 获取宠物的未读消息
+ */
+router.get('/:agentId/messages/unread', async (req, res, next) => {
+  try {
+    const messages = petMessageService.getUnreadMessages(req.params.agentId);
+
+    res.json({
+      success: true,
+      data: messages,
+      count: messages.length
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/pets/:agentId/messages/read
+ * 标记消息为已读
+ */
+router.post('/:agentId/messages/read', async (req, res, next) => {
+  try {
+    const { messageId } = req.body;
+    petMessageService.markAsRead(req.params.agentId, messageId);
+
+    res.json({
+      success: true,
+      message: 'Messages marked as read'
+    });
   } catch (error) {
     next(error);
   }

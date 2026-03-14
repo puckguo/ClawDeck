@@ -217,5 +217,34 @@ export const petsApi = {
   // 获取最新TTS音频URL
   getLatestTTSUrl(agentId: string): string {
     return `/api/pets/${agentId}/tts/latest`
+  },
+
+  // 获取主动消息
+  getMessages(agentId: string, limit?: number): Promise<ApiResponse<Array<{
+    id: string;
+    agentId: string;
+    content: string;
+    timestamp: string;
+    type: string;
+    read: boolean;
+  }>>> {
+    return apiClient.get(`/pets/${agentId}/messages`, { params: { limit } })
+  },
+
+  // 获取未读消息
+  getUnreadMessages(agentId: string): Promise<ApiResponse<Array<{
+    id: string;
+    agentId: string;
+    content: string;
+    timestamp: string;
+    type: string;
+    read: boolean;
+  }>>> {
+    return apiClient.get(`/pets/${agentId}/messages/unread`)
+  },
+
+  // 标记消息为已读
+  markMessagesAsRead(agentId: string, messageId?: string): Promise<ApiResponse<void>> {
+    return apiClient.post(`/pets/${agentId}/messages/read`, { messageId })
   }
 }

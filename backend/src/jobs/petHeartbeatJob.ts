@@ -5,6 +5,7 @@
 
 import { petAIService } from '../services/petAIService';
 import { petService } from '../services/petService';
+import { petMessageService } from '../services/petMessageService';
 
 // 任务配置
 interface HeartbeatConfig {
@@ -12,10 +13,10 @@ interface HeartbeatConfig {
   intervalMinutes: number;  // 心跳间隔（分钟）
 }
 
-// 默认配置：每30分钟更新一次
+// 默认配置：每5分钟更新一次
 const DEFAULT_CONFIG: HeartbeatConfig = {
   enabled: true,
-  intervalMinutes: 30
+  intervalMinutes: 5
 };
 
 export class PetHeartbeatJob {
@@ -118,9 +119,15 @@ export class PetHeartbeatJob {
 
       for (const pet of petSummaries) {
         try {
-          // 调用AI进行状态更新
+          // 1. 调用AI进行状态更新
           await petAIService.heartbeatUpdate(pet.agentId);
-          console.log(`[PetHeartbeat] ✓ ${pet.agentId}: updated`);
+          console.log(`[PetHeartbeat] ✓ ${pet.agentId}: state updated`);
+
+          // 2. 让Agent生成主动消息
+          const message = await petMessageService.generateHeartbeatMessage(pet.agentId);
+          if (message) {
+            console.log(`[PetHeartbeat] ✓ ${pet.agentId}: message generated`);
+          }
         } catch (error) {
           console.error(`[PetHeartbeat] ✗ ${pet.agentId}: failed`, error);
         }

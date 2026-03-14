@@ -433,7 +433,7 @@ export default function PetA2UIPage() {
 
       {/* 聊天抽屉 */}
       <Drawer
-        title="与宠物聊天"
+        title={pet?.status?.name ? `与${pet.status.name}聊天` : '与宠物聊天'}
         placement="right"
         width={400}
         onClose={() => setChatDrawerVisible(false)}
