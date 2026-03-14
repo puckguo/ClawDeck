@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, notification, Spin, Drawer, List, Tag, Select } from 'antd'
+import { Button, Spin, Drawer, List, Tag, Select, App } from 'antd'
 import { ArrowLeftOutlined, MessageOutlined, HistoryOutlined, CameraOutlined, SoundOutlined, PictureOutlined } from '@ant-design/icons'
 import { petsApi } from '../api/pets'
 import type { PetChatMessage } from '../../../shared/types'
@@ -12,6 +12,7 @@ import type { PetChatMessage } from '../../../shared/types'
 export default function PetA2UIPage() {
   const { id: agentId } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { notification } = App.useApp()
 
   const [pet, setPet] = useState<any>(null)
   const [loading, setLoading] = useState(true)
