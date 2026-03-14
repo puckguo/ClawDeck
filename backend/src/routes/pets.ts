@@ -524,7 +524,8 @@ router.post('/:agentId/tts', async (req, res, next) => {
 
     // 使用传入的音色或根据性格选择默认音色
     const { ttsService } = await import('../services/ttsService');
-    const selectedVoice = voice || ttsService.getDefaultVoice(petData.status.personality.type);
+    const personalityType = petData.status?.personality?.type || 'cheerful';
+    const selectedVoice = voice || ttsService.getDefaultVoice(personalityType);
 
     const result = await ttsService.textToSpeech(
       text,
