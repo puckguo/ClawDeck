@@ -55,6 +55,7 @@ export default function PetHome() {
   const navigate = useNavigate()
   const [pets, setPets] = useState<PetSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [petImages, setPetImages] = useState<Record<string, string>>({})
 
   // 获取宠物列表
   const fetchPets = async () => {
@@ -63,6 +64,22 @@ export default function PetHome() {
       const response = await petsApi.getAll()
       if (response.success && response.data) {
         setPets(response.data)
+        // 加载每个宠物的图片
+        response.data.forEach(async (pet) => {
+          try {
+            const imgResponse = await petsApi.getImages(pet.agentId)
+            if (imgResponse.success && imgResponse.data && imgResponse.data.history && imgResponse.data.history.length > 0) {
+              const latest = imgResponse.data.history[0]
+              const filename = latest.localPath?.split(/[\\/]/).pop() || ''
+              setPetImages(prev => ({
+                ...prev,
+                [pet.agentId]: petsApi.getImageFileUrl(pet.agentId, filename)
+              }))
+            }
+          } catch (e) {
+            console.log('Failed to load image for', pet.agentId)
+          }
+        })
       }
     } catch (error) {
       notification.error({
@@ -159,10 +176,23 @@ export default function PetHome() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 80,
-                        position: 'relative'
+                        position: 'relative',
+                        overflow: 'hidden'
                       }}
                     >
-                      {pet.isSleeping ? '💤' : MOOD_CONFIG[pet.mood]?.icon || '🐾'}
+                      {petImages[pet.agentId] ? (
+                        <img
+                          src={petImages[pet.agentId]}
+                          alt={pet.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        pet.isSleeping ? '💤' : MOOD_CONFIG[pet.mood]?.icon || '🐾'
+                      )}
                       {pet.isSleeping && (
                         <div style={{
                           position: 'absolute',

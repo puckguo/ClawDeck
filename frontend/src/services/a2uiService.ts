@@ -95,9 +95,11 @@ export class A2UIService {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
-      console.log('[A2UI] Pet image loaded successfully');
+      console.log('[A2UI] Pet image loaded successfully, size:', img.width, 'x', img.height);
       this.petImage = img;
       this.imageLoading = false;
+      // 触发一次重绘
+      this.render();
     };
     img.onerror = (err) => {
       console.error('[A2UI] Failed to load pet image:', err);
@@ -130,8 +132,11 @@ export class A2UIService {
 
     const parent = this.canvas.parentElement;
     if (parent) {
-      this.canvas.width = parent.clientWidth;
-      this.canvas.height = parent.clientHeight;
+      const width = parent.clientWidth || 800;
+      const height = parent.clientHeight || 600;
+      this.canvas.width = width;
+      this.canvas.height = height;
+      console.log(`[A2UI] Canvas resized to ${width}x${height}`);
     }
   }
 
@@ -152,8 +157,12 @@ export class A2UIService {
   private render(): void {
     if (!this.ctx || !this.canvas) return;
 
-    // 清空画布
+    // 清空画布（使用透明）
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // 调试：绘制背景色确保Canvas可见
+    this.ctx.fillStyle = '#e8e8e8';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // 渲染宠物
     this.renderPet();

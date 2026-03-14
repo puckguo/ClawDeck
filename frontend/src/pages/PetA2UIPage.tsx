@@ -7,14 +7,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Button, notification, Spin, Drawer, List, Tag, Select } from 'antd'
 import { ArrowLeftOutlined, MessageOutlined, HistoryOutlined, CameraOutlined, SoundOutlined, PictureOutlined } from '@ant-design/icons'
 import { petsApi } from '../api/pets'
-import { a2uiService } from '../services/a2uiService'
 import type { PetChatMessage } from '../../../shared/types'
 
 export default function PetA2UIPage() {
   const { id: agentId } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const canvasInitializedRef = useRef(false)
 
   const [pet, setPet] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -31,6 +28,7 @@ export default function PetA2UIPage() {
   const [imagesDrawerVisible, setImagesDrawerVisible] = useState(false)
   const [images, setImages] = useState<Array<{ type: string; prompt: string; localPath: string; generatedAt: string }>>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [latestImageUrl, setLatestImageUrl] = useState<string>('')
 
   // 加载宠物数据
   const loadPet = async (showLoading = true) => {
@@ -41,8 +39,6 @@ export default function PetA2UIPage() {
       const response = await petsApi.getById(agentId)
       if (response.success && response.data) {
         setPet(response.data)
-        // 更新A2UI服务的状态
-        a2uiService.updatePetState(response.data.status)
       }
     } catch (error) {
       notification.error({
@@ -109,7 +105,14 @@ export default function PetA2UIPage() {
     try {
       const response = await petsApi.getImages(agentId)
       if (response.success && response.data) {
-        setImages(response.data.history || [])
+        const history = response.data.history || []
+        setImages(history)
+        // 设置最新图片
+        if (history.length > 0) {
+          const latest = history[0]
+          const filename = latest.localPath?.split(/[\\/]/).pop() || ''
+          setLatestImageUrl(petsApi.getImageFileUrl(agentId, filename))
+        }
       }
     } catch (error) {
       console.error('Failed to load images:', error)
@@ -119,6 +122,7 @@ export default function PetA2UIPage() {
   // 初始加载
   useEffect(() => {
     loadPet()
+    loadImages() // 加载最新图片
     loadChatHistory()
     loadTTSVoices()
 
@@ -134,42 +138,6 @@ export default function PetA2UIPage() {
       }
     }
   }, [agentId])
-
-  // 初始化 Canvas（只执行一次）
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (canvas && !canvasInitializedRef.current) {
-      canvasInitializedRef.current = true
-      a2uiService.initCanvas(canvas)
-    }
-  }, [])
-
-  // 当 agentId 可用时加载图片
-  useEffect(() => {
-    if (agentId) {
-      a2uiService.setAgentId(agentId)
-    }
-  }, [agentId])
-
-  // 处理Canvas点击
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const handleClick = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      const action = a2uiService.handleClick(x, y)
-      if (action) {
-        handleInteraction(action)
-      }
-    }
-
-    canvas.addEventListener('click', handleClick)
-    return () => canvas.removeEventListener('click', handleClick)
-  }, [pet])
 
   // 处理互动
   const handleInteraction = async (type: string) => {
@@ -210,6 +178,10 @@ export default function PetA2UIPage() {
         setChatMessage('')
         await loadChatHistory()
         await loadPet()
+        // 自动播放宠物回复的TTS
+        if (response.data.message?.content) {
+          playPetVoice(response.data.message.content)
+        }
       }
     } catch (error) {
       notification.error({
@@ -234,8 +206,8 @@ export default function PetA2UIPage() {
           message: '图片生成成功',
           description: '宠物形象已更新'
         })
-        // 刷新图片
-        a2uiService.refreshPetImage()
+        // 刷新最新图片
+        await loadImages()
       } else {
         notification.error({
           message: '图片生成失败',
@@ -271,18 +243,48 @@ export default function PetA2UIPage() {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 120px)', overflow: 'hidden', background: '#f5f5f5' }}>
-      {/* Canvas 层 */}
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          cursor: 'pointer'
-        }}
-      />
+      {/* 宠物图片层 */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        textAlign: 'center'
+      }}>
+        {latestImageUrl ? (
+          <img
+            src={latestImageUrl}
+            alt={pet?.status?.name || '宠物'}
+            style={{
+              width: 300,
+              height: 300,
+              objectFit: 'cover',
+              borderRadius: '50%',
+              border: '4px solid rgba(255,255,255,0.8)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+            }}
+          />
+        ) : (
+          <div style={{
+            width: 300,
+            height: 300,
+            borderRadius: '50%',
+            background: '#ddd',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 120
+          }}>
+            {pet?.status?.mood === 'sleeping' ? '💤' : '🐾'}
+          </div>
+        )}
+        <h2 style={{ marginTop: 20, color: '#333' }}>{pet?.status?.name}</h2>
+        {pet?.status?.thought && (
+          <p style={{ color: '#666', fontSize: 14, maxWidth: 400, margin: '10px auto' }}>
+            💭 {pet.status.thought}
+          </p>
+        )}
+      </div>
 
       {/* 顶部工具栏 */}
       <div

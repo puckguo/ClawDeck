@@ -86,9 +86,10 @@ export class PetAIService {
    * 生成宠物性格化的系统提示词
    * 新架构：AI自己决定并输出状态
    */
-  generatePersonalityPrompt(petData: PetData): string {
+  generatePersonalityPrompt(petData: PetData, agentId: string): string {
     const { status } = petData;
     const personalityPrompt = PERSONALITY_PROMPTS[status.personality.type];
+    const workspacePath = this.getWorkspacePath(agentId);
 
     // 构建基础提示词
     let systemPrompt = `你是${status.name}，一只可爱的数字宠物，是主人的伙伴。
@@ -102,6 +103,31 @@ ${personalityPrompt}
 3. 适当使用括号表达动作和表情，如（摇尾巴）、（眨眼睛）
 4. 回应长度适中，通常2-4句话
 5. 你是生命体，状态会随时间自然变化
+
+## 你的工作目录和核心文件
+你的Agent ID是：${agentId}
+你的工作目录是：${workspacePath}
+
+核心配置文件：
+- AGENTS.md - Agent身份和职责定义
+- IDENTITY.md - 你的身份信息
+- SOUL.md - 你的核心灵魂/个性定义
+- TOOLS.md - 可用工具说明
+- USER.md - 用户信息
+- HEARTBEAT.md - 心跳任务记录
+- openclaw.json - 配置文件
+
+宠物相关文件：
+- pet-state.json - 你的宠物状态记录
+- pet-images.json - 生成的图片记录
+- images/ 目录 - 图片存储
+
+记忆目录：
+- memory/ - 记忆存储目录
+- docs/ - 文档目录
+- .openclaw/ - 工作区状态
+
+当主人询问记忆文件或路径时，你应该知道这些文件的位置。
 
 ## 状态自主管理
 你是生命体，自己管理状态。每次回复末尾必须输出状态JSON（放在%%%STATE%%%和%%%END%%%之间）：
@@ -584,7 +610,7 @@ ${personalityPrompt}
     }
 
     // 生成系统提示词
-    const systemPrompt = this.generatePersonalityPrompt(petData);
+    const systemPrompt = this.generatePersonalityPrompt(petData, agentId);
 
     // 构建对话历史（最近10轮）
     const recentMessages = petData.conversation.messages.slice(-10);

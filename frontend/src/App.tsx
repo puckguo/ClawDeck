@@ -1,7 +1,7 @@
-import { Routes, Route, Navigate, Link } from 'react-router-dom'
-import { Layout, Select, Space, Button } from 'antd'
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { Layout, Select, Space } from 'antd'
 import { useTranslation } from 'react-i18next'
-import { GlobalOutlined, ShoppingOutlined } from '@ant-design/icons'
+import { GlobalOutlined } from '@ant-design/icons'
 import Sidebar from './components/Sidebar'
 import AgentList from './pages/AgentList'
 import AgentDetail from './pages/AgentDetail'
@@ -28,11 +28,11 @@ function App() {
       <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
         <h1 style={{ margin: 0, fontSize: '20px' }}>🐾 OpenClaw Pet - 数字宠物养成</h1>
         <Space>
-          <Link to="/bountyclaw">
+          {/* <Link to="/bountyclaw">
             <Button type="primary" icon={<ShoppingOutlined />} style={{ marginRight: 16 }}>
               🦞 龙虾众包
             </Button>
-          </Link>
+          </Link> */}
           <GlobalOutlined />
           <Select
             value={i18n.language}

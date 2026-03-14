@@ -7,7 +7,6 @@ import {
   SettingOutlined,
   PlusOutlined,
   ShoppingOutlined,
-  DollarOutlined,
   HeartFilled
 } from '@ant-design/icons'
 
@@ -27,11 +26,11 @@ export default function Sidebar() {
       icon: <ShoppingOutlined />,
       label: t('nav.skillsMarket')
     },
-    {
-      key: '/bountyclaw',
-      icon: <DollarOutlined />,
-      label: '🦞 龙虾众包'
-    },
+    // {
+    //   key: '/bountyclaw',
+    //   icon: <DollarOutlined />,
+    //   label: '🦞 龙虾众包'
+    // },
     {
       key: '/agents',
       icon: <TeamOutlined />,
